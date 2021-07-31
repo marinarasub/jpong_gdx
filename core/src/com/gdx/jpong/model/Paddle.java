@@ -34,6 +34,7 @@ public class Paddle extends GameObject {
 
     @Override
     public void update() {
+        super.update();
         x = Math.min(Gdx.graphics.getWidth() - getHalfWidth(), Math.max(getHalfWidth(), x));
         y = Math.min(Gdx.graphics.getHeight() - getHalfHeight() , Math.max(getHalfHeight(), y));
     }

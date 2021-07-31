@@ -30,5 +30,7 @@ public abstract class PongEntity {
         return paddle;
     }
 
-    public abstract void update();
+    public void update() {
+        // nothin'
+    }
 }

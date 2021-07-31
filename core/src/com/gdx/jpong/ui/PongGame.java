@@ -13,10 +13,7 @@ import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.utils.ScreenUtils;
-import com.gdx.jpong.model.Ball;
-import com.gdx.jpong.model.Paddle;
-import com.gdx.jpong.model.PongAI;
-import com.gdx.jpong.model.PongPlayer;
+import com.gdx.jpong.model.*;
 
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -27,6 +24,8 @@ public class PongGame extends Game {
 
 	static final String AUDIO_PATH = "audio/";
 	static final int TEST_BALLS = 0;
+	static final float BPM = 177; // TODO songmap
+	static final float SPAWN_DELAY = 60 / BPM;
 
 	private ShapeRenderer shape;
 	private SpriteBatch batch;
@@ -34,6 +33,7 @@ public class PongGame extends Game {
 	private List<Ball> balls;
 	private PongPlayer player;
 	private PongAI ai;
+	private Clock gameTime;
 
 	private Music music;
 
@@ -48,8 +48,9 @@ public class PongGame extends Game {
 			//balls.add(new Ball(300, 300, 10, 0, 0));
 			balls.add(randomBall());
 		}
-		player = new PongPlayer(new Paddle(150.f, 50));
- 		ai = new PongAI(new Paddle(150.f, getHeight() - 50));
+		player = new PongPlayer(new Paddle(200.f, 50));
+ 		ai = new PongAI(new Paddle(200.f, getHeight() - 50));
+ 		gameTime = new Clock();
 		music();
 
 		scoreLabel();
@@ -68,16 +69,27 @@ public class PongGame extends Game {
 	private void music() {
 		music = Gdx.audio.newMusic(Gdx.files.internal(AUDIO_PATH + "Kano - Stella-rium.mp3"));
 		music.play();
+		music.setOnCompletionListener(new Music.OnCompletionListener() {
+			@Override
+			public void onCompletion(Music music) {
+				exit();
+			}
+		});
 	}
 
 	private Ball randomBall() {
 		Random r = new Random();
 		return new Ball(
-				r.nextInt(getWidth()),
-				r.nextInt(getHeight()),
-				25.f,
-				2 * (r.nextFloat() - 0.5f),
-				6 * (r.nextFloat() - 0.5f));
+				(gameTime.getTimeElapsedSeconds() * 50) % getWidth(),
+				gameTime.getTimeElapsedSeconds() % 2 == 1 ?
+						50 + player.getPaddle().getHeight()
+						: getHeight() - 50 - ai.getPaddle().getHeight(), // TODO set const
+				// for 50
+				15.f, // TODO const ball radius
+				1 * (r.nextFloat() - 0.5f),
+				gameTime.getTimeElapsedSeconds() % 2 == 1 ?
+						3 * (r.nextFloat()) + 1
+						: -3 * (r.nextFloat()) - 1);
 	}
 
 	private int getHeight() {
@@ -91,8 +103,8 @@ public class PongGame extends Game {
 	@Override
 	public void render () {
 		update();
-		//Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
-		ScreenUtils.clear(Color.CLEAR);
+		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
+		//ScreenUtils.clear(Color.CLEAR);
 		shape.begin(ShapeRenderer.ShapeType.Filled);
 		balls.forEach(b -> b.draw(shape));
 		player.draw(shape);
@@ -100,16 +112,32 @@ public class PongGame extends Game {
 		shape.end();
 
 		batch.begin();
-		scoreLabel.draw(batch, "SCORE: " + player.getScore(), 20, getHeight() - 50);
+		scoreLabel.draw(
+				batch, "FPS: " + Gdx.graphics.getFramesPerSecond()
+						+ "\nSCORE: " + player.getScore()
+						+ "\nAISCORE: " +ai.getScore()
+						+ "\n" + gameTime.getDisplayTime(),
+				20,
+				getHeight() - 20);
 		batch.end();
 	}
 
+	private void handleTime() {
+		gameTime.update();
+		if (gameTime.getIntervalElapsed() >= SPAWN_DELAY) {
+			balls.add(randomBall());
+			gameTime.setMarkedTime();
+		}
+	}
+
 	public void update() {
+		handleTime();
 		handleMouseInput();
 		balls.forEach(b -> b.update(player.getPaddle()));
 		balls.forEach(b -> b.update(ai.getPaddle()));
 		handleOutOfBounds();
 		player.update();
+		ai.update(balls);
 	}
 
 	private void handleOutOfBounds() {
@@ -141,5 +169,13 @@ public class PongGame extends Game {
 		if (Gdx.input.isKeyPressed(Input.Keys.A)) {
 			balls.forEach(System.out::println);
 		}
+		if (Gdx.input.isKeyPressed(Input.Keys.ESCAPE)) {
+			exit();
+		}
+	}
+
+	private void exit() {
+		this.dispose();
+		Gdx.app.exit();
 	}
 }
