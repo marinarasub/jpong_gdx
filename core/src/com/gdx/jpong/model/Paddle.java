@@ -5,29 +5,41 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 
 public class Paddle extends GameObject {
 
-    static final int DEFAULT_Y = 25;
-    static final int PADDLE_HEIGHT = 10;
+    static final int PADDLE_HEIGHT = 20;
 
-    private int width;
+    private float width;
+    private float height;
 
-    public int getWidth() {
+    public float getWidth() {
         return width;
     }
 
-    public Paddle(int width) {
-        super(Gdx.graphics.getWidth() / 2, DEFAULT_Y);
+    public float getHeight() {
+        return height;
+    }
+
+    public float getHalfWidth() {
+        return width / 2.f;
+    }
+
+    public float getHalfHeight() {
+        return height / 2.f;
+    }
+
+    public Paddle(float width, float y) {
+        super((float) Gdx.graphics.getWidth() / 2.f, y);
         this.width = width;
+        this.height = PADDLE_HEIGHT;
     }
 
     @Override
     public void update() {
-        x = Gdx.input.getX();
-        y = Gdx.graphics.getHeight() - Gdx.input.getY();
+        x = Math.min(Gdx.graphics.getWidth() - getHalfWidth(), Math.max(getHalfWidth(), x));
+        y = Math.min(Gdx.graphics.getHeight() - getHalfHeight() , Math.max(getHalfHeight(), y));
     }
 
     @Override
     public void draw(ShapeRenderer shape) {
-        float halfWidth = (float) width / 2;
-        shape.rect(x - halfWidth, y, width, PADDLE_HEIGHT);
+        shape.rect(x - getHalfWidth(), y - getHalfHeight(), width, height);
     }
 }

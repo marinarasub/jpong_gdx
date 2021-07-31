@@ -1,13 +1,13 @@
 package com.gdx.jpong.ui.screen;
 
 import com.badlogic.gdx.Screen;
-import com.gdx.jpong.ui.JPongGame;
+import com.gdx.jpong.ui.PongGame;
 
 public class GameScreen implements Screen {
 
-    private final JPongGame game;
+    private PongGame game;
 
-    public GameScreen(final JPongGame game) {
+    public GameScreen(final PongGame game) {
         this.game = game;
     }
 
