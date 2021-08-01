@@ -7,59 +7,57 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 
 import java.util.*;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
-//import org.jetbrains.annotations.NotNull;
-
 public class Ball extends GameObject {
 
     private Sound hitSound;
 
     private float radius;
+    private boolean immune; // ignore collision to paddles
 
     private Color color;
 
     public Ball(float x, float y, float radius, float velX, float velY) {
         super(x, y, velX, velY);
         this.radius = radius;
-        this.color = Color.WHITE;
+        this.color = Color.LIGHT_GRAY;
         hitSound = Gdx.audio.newSound(Gdx.files.internal("audio/sounds/soft-hitclap.wav"));
+        immune = true;
     }
 
     // copy object
     public Ball (Ball b) {
-        super(b.x, b.y, b.velX, b.velY);
-        this.radius = b.radius;
-        this.color = b.color;
+        super(b.getX(), b.getY(), b.getVelX(), b.getVelY());
+        this.radius = b.getRadius();
+        this.color = b.getColor();
         this.hitSound = b.hitSound;
     }
 
-    public float getVelX() {
-        return velX;
+    public float getRadius() {
+        return radius;
     }
 
-    public float getVelY() {
-        return velY;
+    public Color getColor() {
+        return color;
     }
 
     //@Override
-    public void update(Paddle paddle) {
-        x += velX;
-        y += velY;
-        handlePaddleCollision(paddle);
-        handleBorderCollision();
+    public void update(float deltaTime, Paddle paddle) {
+        super.update(deltaTime);
+        handlePaddleCollision(deltaTime, paddle);
+        handleBorderCollision(deltaTime);
     }
 
     // no paddle.
     @Override
-    public void update() {
-        super.update();
-        handleBorderCollision();
+    public void update(float deltaTime) {
+        super.update(deltaTime);
+        handleBorderCollision(deltaTime);
     }
 
     // return last y pos, 0 if not
     public float isOutOfYBounds() {
-        if (y + radius < 0 || y - radius > Gdx.graphics.getHeight()) {
-            return y;
+        if (getY() + radius < 0 || getY() - radius > Gdx.graphics.getHeight()) {
+            return getY();
         }
         return 0;
     }
@@ -68,52 +66,72 @@ public class Ball extends GameObject {
      * @param paddle paddle to check collision with
      * @return true if collision
      */
-    private boolean handlePaddleCollision(Paddle paddle) {
+    private boolean handlePaddleCollision(float deltaTime, Paddle paddle) {
         float halfPaddleHeight = paddle.getHalfHeight();
         float halfPaddleWidth = paddle.getHalfWidth();
 
-        float deltaY = this.y - paddle.y;
-        float deltaX = this.x - paddle.x;
+        float deltaY = this.getY() - paddle.getY();
+        float deltaX = this.getX() - paddle.getX();
 
         float intersectY = (halfPaddleHeight + this.radius) - Math.abs(deltaY);
         float intersectX = (halfPaddleWidth + this.radius) - Math.abs(deltaX);
 
-
-
         if (intersectX > 0 && intersectY > 0) {
-            hitSound.play(0.3f);
             // SIDE COLL TODO holy shit its messy
-            if (this.x >= paddle.x - halfPaddleWidth && this.x <= paddle.x + halfPaddleWidth) {
+            if (this.getX() + this.getRadius() / 2 >= paddle.getX() - halfPaddleWidth
+                    && this.getX() - this.getRadius() / 2 <= paddle.getX() + halfPaddleWidth) {
                 //X VEL BASED ON dX from PADDLE CENTER
-                float totalVelSqr = velX * velX + velY * velY;
-                try {
-                    float totalVel = (float) Math.sqrt(totalVelSqr);
-                    float newVelX = (deltaX / halfPaddleWidth) * 0.8f * totalVel; // 80% is max vel transfer into x dir.
-                    float newSpeedY = (float) Math.sqrt(totalVelSqr - newVelX * newVelX);
-                    this.velY = deltaY > 0 ? newSpeedY : -newSpeedY;
-                    this.velX = newVelX;
-                } catch (Exception e) {
-                    System.err.println("Probably Math Error");
-                    e.printStackTrace();
-                }
-                if (paddle.y < this.y) {
-                    this.y += intersectY;
-
+                if (!immune) {
+                    hitSound.play(0.3f);
+                    calculateNewVelocity(halfPaddleWidth, deltaX, deltaY);
+                    if (paddle.getY() < this.getY()) {
+                        this.translate(0, intersectY);
+                    } else {
+                        this.translate(0, -intersectY);
+                    }
                 } else {
-                    this.y -= intersectY;
+                    handleImmunity(paddle);
                 }
             } else { //if (this.y >= paddle.y - halfPaddleHeight && this.y <= paddle.y + halfPaddleHeight) {
-                this.velX = -this.velX;
-                // L OR R
-                if (paddle.x < this.x) {
-                    this.x += intersectX;
-                } else {
-                    this.x -= intersectX;
+                if (!immune) {
+                    hitSound.play(0.3f);
+                    flipVelX();
+                    // L OR R
+                    if (paddle.getX() < this.getX()) {
+                        this.translate(intersectX, 0);
+                    } else {
+                        this.translate(-intersectX, 0);
+                    }
                 }
             }
             return true;
         }
         return false;
+    }
+
+    private void handleImmunity(Paddle paddle) {
+        if (this.getVelY() > 0) {
+            if (this.getY() > Gdx.graphics.getWidth() / 2) {
+                removeImmunity();
+            }
+        } else {
+            if (this.getY() < Gdx.graphics.getWidth() / 2)
+                removeImmunity();
+        }
+    }
+
+    private void removeImmunity() {
+        immune = false;
+        this.color = Color.WHITE;
+    }
+
+    private void calculateNewVelocity(float halfPaddleWidth, float deltaX, float deltaY) {
+        float totalVel = velocity.len();
+        float newVelX = (deltaX / halfPaddleWidth) * 0.8f * totalVel;
+        // TODO const 80% is max vel transfer into x dir.
+        float newSpeedY = (float) Math.sqrt(velocity.len2()- newVelX * newVelX);
+        this.setVelY(deltaY > 0 ? newSpeedY : -newSpeedY);
+        this.setVelX(newVelX);
     }
 
 //    /**
@@ -129,20 +147,21 @@ public class Ball extends GameObject {
 //    }
 
     // Returns new ball (not orignial after n updates) ghost update)
-    public static void simulateBallUpdate(Ball ball, int updates) {
+    public static void simulateBallUpdate(float deltaTime, Ball ball, int updates) {
+        if (updates < 1) updates = 1;
         for (int i = 0; i < updates; i++) {
-            ball.update();
+            ball.update(deltaTime);
         }
     }
 
-    private void handleBorderCollision() { // TODO collide only on incoming side
-        if (x - radius < 0 || x + radius > Gdx.graphics.getWidth()) {
+    private void handleBorderCollision(float deltaTime) { // TODO collide only on incoming side
+        if (getX() - radius < 0 || getX() + radius > Gdx.graphics.getWidth()) {
             //hitSound.play(0.3f);
-            velX = -velX;
-            if (x - radius < 0) {
-                x = 0 + radius;
+            setVelX(-getVelX());
+            if (getX() - radius < 0) {
+                setX(0 + radius);
             } else {
-                x = Gdx.graphics.getWidth() - radius;
+                setX(Gdx.graphics.getWidth() - getRadius());
             }
         }
 //        if (y - radius < 0 || y + radius > Gdx.graphics.getHeight()) {
@@ -152,13 +171,13 @@ public class Ball extends GameObject {
 
     @Override
     public void draw(ShapeRenderer shape) {
-        shape.setColor(color);
-        shape.circle(x, y, radius);
+        shape.setColor(getColor());
+        shape.circle(getX(), getY(), getRadius());
     }
 
     @Override
     public String toString() {
-        return "Ball (" + x + ", " + y +")";
+        return "Ball @ (" + getX() + ", " + getY() +")";
     }
 
 
@@ -211,20 +230,20 @@ public class Ball extends GameObject {
 
     // return true if 1 is closer or equal, pythag.
     public static boolean compareCloserBallY(float x, float y, Ball ball1, Ball ball2) {
-        float ball1dist = (float) Math.sqrt(ball1.x * ball1.x + ball1.y * ball1.y);
-        float ball2dist = (float) Math.sqrt(ball2.x * ball2.x + ball2.y * ball2.y);
+        float ball1dist = ball1.velocity.len();
+        float ball2dist = ball2.velocity.len();
         return ball1dist <= ball2dist;
     }
 
     public static boolean compareCloserBallY(float y, Ball ball1, Ball ball2) {
-        float ball1dist = Math.abs(ball1.y - y);
-        float ball2dist = Math.abs(ball2.y - y);
+        float ball1dist = Math.abs(ball1.getY() - y);
+        float ball2dist = Math.abs(ball2.getY() - y);
         return ball1dist <= ball2dist;
     }
 
     public static boolean compareCloserBallYVel(float y, Ball ball1, Ball ball2) {
-        float ball1z = Math.abs(ball1.y - y) / ball1.getVelY();
-        float ball2z= Math.abs(ball2.y - y) / ball2.getVelY();
+        float ball1z = Math.abs(ball1.getY() - y) / ball1.getVelY();
+        float ball2z= Math.abs(ball2.getY() - y) / ball2.getVelY();
         return ball1z <= ball2z;
     }
 

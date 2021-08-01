@@ -1,7 +1,9 @@
-package com.gdx.jpong.model;
+package com.gdx.jpong.model.entity;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+import com.gdx.jpong.model.Paddle;
+import com.gdx.jpong.model.entity.PongEntity;
 
 /**
  * handles input and stuff.
@@ -13,10 +15,10 @@ public class PongPlayer extends PongEntity {
     }
 
     @Override
-    public void update() {
-        paddle.x = Gdx.input.getX();
-        //paddle.y = Gdx.graphics.getHeight() - Gdx.input.getY();
-        paddle.update();
+    public void update(float deltaTime) {
+        paddle.setX(Gdx.input.getX());
+        //paddle.getY() = Gdx.graphics.getHeight() - Gdx.input.getY();
+        paddle.update(deltaTime);
     }
 
     public void draw(ShapeRenderer shape) {

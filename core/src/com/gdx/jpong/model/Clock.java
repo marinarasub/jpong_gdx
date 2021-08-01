@@ -2,13 +2,14 @@ package com.gdx.jpong.model;
 
 import com.badlogic.gdx.Gdx;
 
-import java.text.DecimalFormat;
 import java.util.Locale;
 
 public class Clock {
 
     private float timeElapsed; //
     private float markedTime; // To calc delta between two points
+
+    private boolean paused;
 
     public Clock() {
         timeElapsed = 0;
@@ -50,8 +51,15 @@ public class Clock {
             return getTimeElapsedMinutes() + ":" + String.format(Locale.US, "%05.2f", getTimeElapsed() % 60);
     }
 
+    // REQUIRES: called every render update in main game loop
     public void update() {
-        timeElapsed += getDeltaTime();
+        if (!paused) {
+            timeElapsed += getDeltaTime();
+        }
+    }
+
+    public void pause() {
+        paused = true;
     }
 
 }

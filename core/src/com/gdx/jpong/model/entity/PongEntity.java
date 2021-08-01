@@ -1,4 +1,7 @@
-package com.gdx.jpong.model;
+package com.gdx.jpong.model.entity;
+
+import com.badlogic.gdx.graphics.Color;
+import com.gdx.jpong.model.Paddle;
 
 /**
  * a guy with a paddle.
@@ -30,7 +33,11 @@ public abstract class PongEntity {
         return paddle;
     }
 
-    public void update() {
+    public void setPaddleColor(Color color) {
+        paddle.setColor(color);
+    }
+
+    public void update(float deltaTime) {
         // nothin'
     }
 }
