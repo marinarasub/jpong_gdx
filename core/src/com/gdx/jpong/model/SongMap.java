@@ -12,6 +12,7 @@ public class SongMap {
     private Music music;
     private float bpm = 1; // CANNOT BE 0
     private float startOffset = 0;
+    private boolean start = false;
     private float lastTime;
 
     private boolean waiting; // waiting to spawn
@@ -63,7 +64,12 @@ public class SongMap {
     }
 
     public void update() {
-        if (lastInterval() < startOffset) return;
+        if (!start) {
+            if (lastInterval() >= startOffset) {
+                start = true;
+                return;
+            }
+        }
         if (lastInterval() >= getTimePerBeat()) {
             waiting = true;
             music.pause();

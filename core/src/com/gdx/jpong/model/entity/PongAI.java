@@ -18,9 +18,9 @@ public class PongAI extends PongEntity {
 
     public PongAI(final Paddle paddle) {
         super(paddle);
-        this.maxSpeed = 5000.f;
+        this.maxSpeed = 5500.f;
         this.maxError = ((int) paddle.getHalfWidth() / 2);
-        this.reaction = 1.2f;
+        this.reaction = 1.1f;
         this.updatePrecison = 60;
     }
 
@@ -85,7 +85,4 @@ public class PongAI extends PongEntity {
     }
 
 
-    public void draw(ShapeRenderer shape) {
-        paddle.draw(shape);
-    }
 }

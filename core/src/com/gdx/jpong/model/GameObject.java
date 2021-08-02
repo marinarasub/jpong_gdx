@@ -33,6 +33,10 @@ public abstract class GameObject {
         this.position.y = y;
     }
 
+    public void setVelocity(Vector2 velocity) {
+        this.velocity = velocity;
+    }
+
     public void setVelX(float velX) {
         this.velocity.x = velX;
     }
@@ -53,11 +57,11 @@ public abstract class GameObject {
         return velocity.y;
     }
 
-    public void flipVelX() {
+    public void reflectVelX() {
         velocity.x = -velocity.x;
     }
 
-    public void flipVelY() {
+    public void reflectVelY() {
         velocity.y = -velocity.y;
     }
 

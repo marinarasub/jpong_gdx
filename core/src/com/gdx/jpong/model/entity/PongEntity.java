@@ -1,6 +1,7 @@
 package com.gdx.jpong.model.entity;
 
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.gdx.jpong.model.Paddle;
 
 /**
@@ -39,5 +40,9 @@ public abstract class PongEntity {
 
     public void update(float deltaTime) {
         // nothin'
+    }
+
+    public void draw(ShapeRenderer shape) {
+        paddle.draw(shape);
     }
 }

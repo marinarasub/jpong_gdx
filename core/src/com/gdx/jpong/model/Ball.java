@@ -4,6 +4,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+import com.badlogic.gdx.math.Vector2;
 
 import java.util.*;
 
@@ -30,6 +31,11 @@ public class Ball extends GameObject {
         this.radius = b.getRadius();
         this.color = b.getColor();
         this.hitSound = b.hitSound;
+        this.immune = b.isImmune();
+    }
+
+    public boolean isImmune() {
+        return immune;
     }
 
     public float getRadius() {
@@ -62,6 +68,31 @@ public class Ball extends GameObject {
         return 0;
     }
 
+    // DEPRECATED: will not push balls, use fixed timestep instead
+//    private boolean handlePaddleCollision(float deltaTime, Paddle paddle) {
+//        float deltaX = this.getX() - paddle.getX();
+//        float deltaY = this.getY() - paddle.getY();
+//        float halfHeight = paddle.getHalfHeight();
+//        float outerX = halfHeight + getRadius();
+//        float lenience = getRadius() / 2;
+//
+//        if (isYCollision(paddle, lenience)) {
+//            if (Math.abs(deltaY) - halfHeight - getRadius() < Math.abs(scaleVelY(deltaTime))) {
+//                //setX();
+//                setY(paddle.getY() + (getVelY() > 0 ? -outerX : outerX));
+//                setVelocity(calculateNewVelocity(paddle, deltaX, getVelY()));
+//                return true;
+//            }
+//        }
+//        return false;
+//    }
+
+    private boolean isYCollision(Paddle paddle, float lenience) {
+        float halfPaddleWidth = paddle.getHalfWidth();
+        return getX() + lenience >= paddle.getX() - halfPaddleWidth
+                && getX() - lenience <= paddle.getX() + halfPaddleWidth;
+    }
+
     /**
      * @param paddle paddle to check collision with
      * @return true if collision
@@ -77,13 +108,12 @@ public class Ball extends GameObject {
         float intersectX = (halfPaddleWidth + this.radius) - Math.abs(deltaX);
 
         if (intersectX > 0 && intersectY > 0) {
-            // SIDE COLL TODO holy shit its messy
-            if (this.getX() + this.getRadius() / 2 >= paddle.getX() - halfPaddleWidth
-                    && this.getX() - this.getRadius() / 2 <= paddle.getX() + halfPaddleWidth) {
+            float lenience = getRadius() / 2;
+            if (isYCollision(paddle, lenience)) {
                 //X VEL BASED ON dX from PADDLE CENTER
                 if (!immune) {
                     hitSound.play(0.3f);
-                    calculateNewVelocity(halfPaddleWidth, deltaX, deltaY);
+                    setVelocity(calculateNewVelocity(paddle, deltaX, getVelY()));
                     if (paddle.getY() < this.getY()) {
                         this.translate(0, intersectY);
                     } else {
@@ -95,7 +125,7 @@ public class Ball extends GameObject {
             } else { //if (this.y >= paddle.y - halfPaddleHeight && this.y <= paddle.y + halfPaddleHeight) {
                 if (!immune) {
                     hitSound.play(0.3f);
-                    flipVelX();
+                    reflectVelX();
                     // L OR R
                     if (paddle.getX() < this.getX()) {
                         this.translate(intersectX, 0);
@@ -125,13 +155,12 @@ public class Ball extends GameObject {
         this.color = Color.WHITE;
     }
 
-    private void calculateNewVelocity(float halfPaddleWidth, float deltaX, float deltaY) {
+    private Vector2 calculateNewVelocity(Paddle p, float deltaX, float velY) {
         float totalVel = velocity.len();
-        float newVelX = (deltaX / halfPaddleWidth) * 0.8f * totalVel;
-        // TODO const 80% is max vel transfer into x dir.
+        float newVelX = (deltaX / p.getHalfWidth()) * 0.8f * totalVel; // TODO const 80% is max vel transfer into x dir.
         float newSpeedY = (float) Math.sqrt(velocity.len2()- newVelX * newVelX);
-        this.setVelY(deltaY > 0 ? newSpeedY : -newSpeedY);
-        this.setVelX(newVelX);
+
+        return new Vector2(newVelX, velY < 0 ? newSpeedY : -newSpeedY);
     }
 
 //    /**
@@ -155,10 +184,13 @@ public class Ball extends GameObject {
     }
 
     private void handleBorderCollision(float deltaTime) { // TODO collide only on incoming side
-        if (getX() - radius < 0 || getX() + radius > Gdx.graphics.getWidth()) {
+        float leftX = getX() - getRadius();
+        float rightX = getX() + getRadius();
+        float addVelX = scaleVelX(deltaTime);
+        if (leftX + addVelX <= 0 || rightX + addVelX >= Gdx.graphics.getWidth()) {
             //hitSound.play(0.3f);
             setVelX(-getVelX());
-            if (getX() - radius < 0) {
+            if (leftX + addVelX <= 0) {
                 setX(0 + radius);
             } else {
                 setX(Gdx.graphics.getWidth() - getRadius());

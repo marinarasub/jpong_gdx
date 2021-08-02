@@ -11,6 +11,7 @@ import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.gdx.jpong.model.*;
 import com.gdx.jpong.model.entity.PongAI;
+import com.gdx.jpong.model.entity.PongEntity;
 import com.gdx.jpong.model.entity.PongPlayer;
 
 import java.util.*;
@@ -21,6 +22,8 @@ public class PongGame extends Game {
 
 	private float height;  // LOGICAL HEIGHT
 	private float width;
+	private final int fixedUPS = 120; // fixed Updates per second
+	private float fixedTimeCarryover = 0; // time running until next update;
 
 	private ShapeRenderer shape;
 	private SpriteBatch batch;
@@ -63,8 +66,13 @@ public class PongGame extends Game {
 	}
 
 	private void music() {
-		music = new SongMap("Kano - Stella-rium.mp3", gameTime);
-		music.setBpm(177.f);
+//		music = new SongMap("Kano - Stella-rium.mp3", gameTime);
+//		music.setBpm(177.f);
+//		music.setStartOffset(0.951f);
+		music = new SongMap("ParagonX9 - Chaoz Fantasy.mp3", gameTime);
+		music.setBpm(162.35f);
+		music.setStartOffset(0.958f);
+
 		music.start();
 		music.setOnCompletionListener(music -> exit());
 	}
@@ -79,22 +87,36 @@ public class PongGame extends Game {
 						: getHeight() - 0 - ai.getPaddle().getHeight(), // TODO set const
 				// for 50
 				15.f, // TODO const ball radius
-				5 * (r.nextFloat() - 0.5f),
+				10 * (r.nextFloat() - 0.5f),
 				gameTime.getTimeElapsedSeconds() % 2 == 1 ?
 						velMultiplier * (r.nextFloat()) + 100.f
 						: velMultiplier * (-r.nextFloat()) - 100.f);
 	}
 
-	private int getHeight() {
+	public int getHeight() {
 		return Gdx.graphics.getHeight();
 	}
 
-	private int getWidth() {
+	public int getWidth() {
 		return Gdx.graphics.getWidth();
+	}
+
+	private float getFixedTime() {
+		return (float) 1 / fixedUPS;
+	}
+
+	private void addFixedTimeCarryover(float amt) {
+		fixedTimeCarryover += amt;
+	}
+
+	private void subtractFixedTimeCarryover(float amt) {
+		if (fixedTimeCarryover - amt >= 0)
+			fixedTimeCarryover -= amt;
 	}
 
 	@Override
 	public void render() {
+		fixedUpdate(gameTime.getDeltaTime());
 		update(gameTime.getDeltaTime());
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
 		//ScreenUtils.clear(Color.CLEAR);
@@ -125,11 +147,19 @@ public class PongGame extends Game {
 		}
 	}
 
+	public void fixedUpdate(float deltaTime) {
+		int numUpdates = (int) ((deltaTime + fixedTimeCarryover) / getFixedTime());
+		addFixedTimeCarryover(deltaTime);
+		subtractFixedTimeCarryover(numUpdates * getFixedTime());
+		for (int i = 0; i < numUpdates; i++) {
+			balls.forEach(b -> b.update(getFixedTime(), player.getPaddle()));
+			balls.forEach(b -> b.update(getFixedTime(), ai.getPaddle()));
+		}
+	}
+
 	public void update(float deltaTime) {
 		handleTime(deltaTime);
 		handleMouseInput();
-		balls.forEach(b -> b.update(deltaTime, player.getPaddle()));
-		balls.forEach(b -> b.update(deltaTime, ai.getPaddle()));
 		handleOutOfBounds();
 		player.update(deltaTime);
 		ai.update(deltaTime, balls);
@@ -142,12 +172,20 @@ public class PongGame extends Game {
 			float yOut = b.isOutOfYBounds();
 			if (yOut != 0) {
 				if (yOut >= getHeight()) {
-					player.addScore(1);
+					handleScore(player, b);
 				} else {
-					ai.addScore(1);
+					handleScore(ai, b);
 				}
 				i.remove();
 			}
+		}
+	}
+
+	private void handleScore(PongEntity p,  Ball b) {
+		if (b.isImmune()) {
+			p.addScore(2);
+		} else {
+			p.addScore(1);
 		}
 	}
 
