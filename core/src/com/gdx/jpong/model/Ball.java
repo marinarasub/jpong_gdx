@@ -163,18 +163,6 @@ public class Ball extends GameObject {
         return new Vector2(newVelX, velY < 0 ? newSpeedY : -newSpeedY);
     }
 
-//    /**
-//     * @param paddle paddle to check collision in y direction with
-//     * @return amount collided by (intersect), > 0 if collision
-//     */
-//    private float checkCollisionY(Paddle paddle) {
-//        return 0; // TODO
-//    }
-//
-//    private float checkCollisionX(Paddle paddle) {
-//        return 0; // TODO
-//    }
-
     // Returns new ball (not orignial after n updates) ghost update)
     public static void simulateBallUpdate(float deltaTime, Ball ball, int updates) {
         if (updates < 1) updates = 1;
@@ -207,21 +195,24 @@ public class Ball extends GameObject {
         shape.circle(getX(), getY(), getRadius());
     }
 
+    /**
+     * @return String representation of ball position and velocity
+     */
     @Override
     public String toString() {
-        return "Ball @ (" + getX() + ", " + getY() +")";
+        return "Ball @ (" + getX() + ", " + getY() +")"
+                + " V (" + getVelX() + ", " + getVelY() + ")";
     }
 
 
     // return new sorted list of balls order by closest euclidian distance to pos x, y
-    // uses java's list sort for now
     public static void sortByClosest(float x, float y, List<Ball> balls) {
         while (true) {
             boolean sorted = true;
             for (int i = 1; i < balls.size()-1; i++) {
                 Ball b1 = balls.get(i-1);
                 Ball b2 = balls.get(i);
-                if (!compareCloserBallY(x, y, b1, b2)) {
+                if (!compareCloserBall(x, y, b1, b2)) {
                     Collections.swap(balls, i, i-1);
                     sorted = false;
                 }
@@ -236,7 +227,7 @@ public class Ball extends GameObject {
             for (int i = 1; i < balls.size()-1; i++) {
                 Ball b1 = balls.get(i-1);
                 Ball b2 = balls.get(i);
-                if (!compareCloserBallY(y, b1, b2)) {
+                if (!compareCloserBall(y, b1, b2)) {
                     Collections.swap(balls, i, i-1);
                     sorted = false;
                 }
@@ -245,46 +236,99 @@ public class Ball extends GameObject {
         }
     }
 
-    public static void sortByClosestYVelocity(float y, List<Ball> balls) {
-        while (true) {
-            boolean sorted = true;
-            for (int i = 1; i < balls.size()-1; i++) {
-                Ball b1 = balls.get(i-1);
-                Ball b2 = balls.get(i);
-                if (!compareCloserBallYVel(y, b1, b2)) {
-                    Collections.swap(balls, i, i-1);
-                    sorted = false;
-                }
+    public static List<Ball> sortByClosestYVelocity(float y, List<Ball> balls) {
+        return mergeSort(y, new LinkedList<>(balls));
+    }
+
+    private static List<Ball> mergeSort(float y, List<Ball> balls) {
+        if (balls.size() <= 1)
+            return balls;
+        int midPoint = (balls.size() / 2);
+        List<Ball> left = new LinkedList<>(balls.subList(0, midPoint));
+        List<Ball> right = new LinkedList<>(balls.subList(midPoint, balls.size()));
+        return merge(y, mergeSort(y, left), mergeSort(y, right));
+    }
+
+    public static List<Ball> merge(float y, List<Ball> left, List<Ball> right) {
+        List<Ball> merge = new LinkedList<>();
+        Iterator<Ball> iLeft = left.listIterator();
+        Iterator<Ball> iRight = right.listIterator();
+        while (iLeft.hasNext() && iRight.hasNext()) {
+            Ball bl = iLeft.next();
+            Ball br = iRight.next();
+            if (compareCloserBallYVel(y, bl, br)) {
+                merge.add(bl);
+                iLeft.remove();
+            } else {
+                merge.add(br);
+                iRight.remove();
             }
-            if (sorted) break;
         }
+        iLeft = left.listIterator();
+        while (iLeft.hasNext()) {
+            Ball b = iLeft.next();
+            merge.add(b);
+            iLeft.remove();
+        }
+        iRight = right.listIterator();
+        while (iRight.hasNext()) {
+            Ball b = iRight.next();
+            merge.add(b);
+            iRight.remove();
+        }
+        return merge;
     }
 
     // return true if 1 is closer or equal, pythag.
-    public static boolean compareCloserBallY(float x, float y, Ball ball1, Ball ball2) {
-        float ball1dist = ball1.velocity.len();
-        float ball2dist = ball2.velocity.len();
+    public static boolean compareCloserBall(float x, float y, Ball ball1, Ball ball2) {
+        float ball1dist = ball1.position.len();
+        float ball2dist = ball2.position.len();
         return ball1dist <= ball2dist;
     }
 
-    public static boolean compareCloserBallY(float y, Ball ball1, Ball ball2) {
+    public static boolean compareCloserBall(float y, Ball ball1, Ball ball2) {
         float ball1dist = Math.abs(ball1.getY() - y);
         float ball2dist = Math.abs(ball2.getY() - y);
         return ball1dist <= ball2dist;
     }
 
+    /**
+     * REQUIRES: y velocity is not 0
+     * Compare two balls using their velocity and current position relative to a y position
+     * @param y
+     * @param ball1
+     * @param ball2
+     * @return true if ball1 will reach pos (~, y) sooner
+     */
     public static boolean compareCloserBallYVel(float y, Ball ball1, Ball ball2) {
-        float ball1z = Math.abs(ball1.getY() - y) / ball1.getVelY();
-        float ball2z= Math.abs(ball2.getY() - y) / ball2.getVelY();
-        return ball1z <= ball2z;
+        float ball1Ratio = (ball1.getY() - y) / -ball1.getVelY();
+        float ball2Ratio = (ball2.getY() - y) / -ball2.getVelY();
+        boolean ball1closer;
+        if (ball1Ratio > 0 && ball2Ratio > 0) {
+            ball1closer = ball1Ratio <= ball2Ratio;
+        } else if (ball1Ratio > 0) {
+            ball1closer = true;
+        } else {
+            ball1closer = ball1Ratio >= ball2Ratio;
+        }
+        return ball1closer;
     }
 
-    public static boolean verifySort(float x, float y,List<Ball> balls) {
+    public static boolean verifySortClose(float x, float y, List<Ball> balls) {
         for (int i = 0; i < balls.size()-2; i++) {
-            if(!compareCloserBallY(x, y, balls.get(i), balls.get(i+1)))
+            if(!compareCloserBall(x, y, balls.get(i), balls.get(i+1)))
                 return false;
         }
         return true;
     }
+
+    public static boolean verifySortCloseYVel(float y, List<Ball> balls) {
+        for (int i = 0; i < balls.size()-2; i++) {
+            if(!compareCloserBallYVel(y, balls.get(i), balls.get(i+1)))
+                return false;
+        }
+        return true;
+    }
+
 
 }

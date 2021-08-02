@@ -37,9 +37,9 @@ public class PongAI extends PongEntity {
         return (float) (maxSpeed * Math.pow(distanceX / (Gdx.graphics.getWidth() - paddle.getHalfWidth()), reaction));
     }
 
-    private void predict(float deltaTime, List<Ball> balls) {
-        if (!balls.isEmpty()) {
-            Ball.sortByClosestYVelocity(paddle.getY(), balls);
+    private void predict(float deltaTime, List<Ball> inList) {
+        if (!inList.isEmpty()) {
+            List<Ball> balls = Ball.sortByClosestYVelocity(paddle.getY(), inList);
             // FACING PADDLE
             target = selectTargetBall(balls);
             if (target != null) {
