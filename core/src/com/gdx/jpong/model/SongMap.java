@@ -2,6 +2,8 @@ package com.gdx.jpong.model;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.audio.Music;
+import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.scenes.scene2d.ui.Image;
 
 public class SongMap {
 
@@ -15,6 +17,9 @@ public class SongMap {
     private boolean start = false;
     private float lastTime;
 
+    private Texture background;
+    private float backgroundDim;
+
     private boolean waiting; // waiting to spawn
 
     public SongMap(String songName) {
@@ -25,6 +30,22 @@ public class SongMap {
     public SongMap(String songName, Clock timer) {
         this.music =  Gdx.audio.newMusic(Gdx.files.internal(AUDIO_PATH + songName));
         this.timer = timer;
+    }
+
+    public void setBackgroundDim(float backgroundDim) {
+        if (backgroundDim <= 1) this.backgroundDim = backgroundDim;
+    }
+
+    public float getBackgroundDim() {
+        return backgroundDim;
+    }
+
+    public void setBackground(Texture image) {
+        this.background = image;
+    }
+
+    public Texture getBackground() {
+        return background;
     }
 
     public boolean isWaiting() {

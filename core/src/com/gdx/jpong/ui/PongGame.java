@@ -5,7 +5,9 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
@@ -27,13 +29,14 @@ public class PongGame extends Game {
 
 	private ShapeRenderer shape;
 	private SpriteBatch batch;
+	private Sprite background;
 
 	private List<Ball> balls;
 	private PongPlayer player;
 	private PongAI ai;
 	private Clock gameTime;
 
-	private SongMap music;
+	private SongMap songMap;
 
 	BitmapFont scoreLabel;
 
@@ -46,15 +49,42 @@ public class PongGame extends Game {
 			//balls.add(new Ball(300, 300, 10, 0, 0));
 			balls.add(randomBall());
 		}
+		players();
+		gameTime = new Clock();
+		song();
+		background();
+		scoreLabel();
+
+		Gdx.graphics.setResizable(false);
+	}
+
+	private void players() {
 		player = new PongPlayer(new Paddle(200.f, 50));
 		player.setPaddleColor(Color.GREEN);
 		ai = new PongAI(new Paddle(200.f, getHeight() - 50));
 		ai.setPaddleColor(Color.RED);
-		gameTime = new Clock();
-		music();
-		scoreLabel();
+	}
 
-		Gdx.graphics.setResizable(false);
+	private void background() {
+		Texture backgroundTex = songMap.getBackground();
+		if (backgroundTex != null) {
+			backgroundTex.setAnisotropicFilter(16.f);
+			background = new Sprite(backgroundTex);
+			background.setAlpha(1 - songMap.getBackgroundDim()); // assume <= 1
+			background.setPosition(0, 0);
+			background.setOrigin(0,0);
+
+			float heightRatio = getHeight() / background.getHeight();
+			float widthRatio = getWidth() / background.getWidth();
+
+			if (heightRatio > widthRatio) {System.out.println(getHeight() / background.getHeight());
+				background.setScale(getHeight() / background.getHeight());
+				background.setPosition((getWidth() - background.getWidth()) / 2, 0);
+			} else {
+				background.setScale(getWidth() / background.getWidth());
+				background.setPosition(0,(getHeight() - background.getHeight()) / 2);
+			}
+		}
 	}
 
 	private void scoreLabel() {
@@ -65,16 +95,19 @@ public class PongGame extends Game {
 		scoreLabel = fontGenerator.generateFont(fontParameter);
 	}
 
-	private void music() {
+	private void song() {
 //		music = new SongMap("Kano - Stella-rium.mp3", gameTime);
 //		music.setBpm(177.f);
 //		music.setStartOffset(0.951f);
-		music = new SongMap("ParagonX9 - Chaoz Fantasy.mp3", gameTime);
-		music.setBpm(162.35f);
-		music.setStartOffset(0.958f);
+		songMap = new SongMap("ParagonX9 - Chaoz Fantasy.mp3", gameTime);
+		songMap.setBpm(162.35f);
+		songMap.setStartOffset(0.958f);
+		songMap.setBackground(new Texture("images/70858371_p0_master1200.jpg")); // TEST LANDSCAPE
+		//songMap.setBackground(new Texture("images/89136015_p0.jpg")); // TEST PORTRAIT
+		songMap.setBackgroundDim(0.75f);
 
-		music.start();
-		music.setOnCompletionListener(music -> exit());
+		songMap.start();
+		songMap.setOnCompletionListener(music -> exit());
 	}
 
 	private Ball randomBall() {
@@ -118,14 +151,19 @@ public class PongGame extends Game {
 	public void render() {
 		fixedUpdate(gameTime.getDeltaTime());
 		update(gameTime.getDeltaTime());
-		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
-		//ScreenUtils.clear(Color.CLEAR);
-		shape.begin(ShapeRenderer.ShapeType.Filled);
-		balls.forEach(b -> b.draw(shape));
-		player.draw(shape);
-		ai.draw(shape);
-		shape.end();
+		clear();
+		renderBackground();
+		renderGraphics();
+		renderHUD();
+	}
 
+	private void renderBackground() {
+		batch.begin();
+		if (background != null) background.draw(batch);
+		batch.end();
+	}
+
+	private void renderHUD() {
 		batch.begin();
 		scoreLabel.draw(
 				batch, "FPS: " + Gdx.graphics.getFramesPerSecond()
@@ -138,11 +176,23 @@ public class PongGame extends Game {
 		batch.end();
 	}
 
+	private void renderGraphics() {
+		shape.begin(ShapeRenderer.ShapeType.Filled);
+		balls.forEach(b -> b.draw(shape));
+		player.draw(shape);
+		ai.draw(shape);
+		shape.end();
+	}
+
+	private void clear() {
+		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
+	}
+
 	private void handleTime(float deltaTime) {
 		gameTime.update();
-		music.update();
-		if (music.isWaiting()) { // TODO
-			music.endWaiting();
+		songMap.update();
+		if (songMap.isWaiting()) { // TODO
+			songMap.endWaiting();
 			balls.add(randomBall());
 		}
 	}

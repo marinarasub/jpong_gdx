@@ -157,7 +157,7 @@ public class Ball extends GameObject {
 
     private Vector2 calculateNewVelocity(Paddle p, float deltaX, float velY) {
         float totalVel = velocity.len();
-        float newVelX = (deltaX / p.getHalfWidth()) * 0.8f * totalVel; // TODO const 80% is max vel transfer into x dir.
+        float newVelX = (deltaX / p.getHalfWidth()) * 0.9f * totalVel; // TODO const 90% is max vel transfer into x dir.
         float newSpeedY = (float) Math.sqrt(velocity.len2()- newVelX * newVelX);
 
         return new Vector2(newVelX, velY < 0 ? newSpeedY : -newSpeedY);
