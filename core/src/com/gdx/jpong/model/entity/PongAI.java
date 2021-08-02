@@ -1,7 +1,6 @@
 package com.gdx.jpong.model.entity;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.gdx.jpong.model.Ball;
 import com.gdx.jpong.model.Paddle;
 
@@ -18,7 +17,7 @@ public class PongAI extends PongEntity {
 
     public PongAI(final Paddle paddle) {
         super(paddle);
-        this.maxSpeed = 5500.f;
+        this.maxSpeed = 5000.f;
         this.maxError = ((int) paddle.getHalfWidth() / 2);
         this.reaction = 1.1f;
         this.updatePrecison = 60;
@@ -39,11 +38,11 @@ public class PongAI extends PongEntity {
 
     private void predict(float deltaTime, List<Ball> inList) {
         if (!inList.isEmpty()) {
-            List<Ball> balls = Ball.sortByClosestYVelocity(paddle.getY(), inList);
+            float paddleYAim = paddle.getY() - paddle.getHalfHeight();
+            List<Ball> balls = Ball.sortByClosestVelY(paddleYAim, inList);
             // FACING PADDLE
             target = selectTargetBall(balls);
             if (target != null) {
-                float paddleYAim = paddle.getY() - paddle.getHalfHeight();
                 Ball sim = aimAtBall(deltaTime, target, paddleYAim);
                 float deltaX = sim.getX() - paddle.getX();
                 trackX(deltaX, (float) (maxError * Math.random()));
@@ -77,8 +76,7 @@ public class PongAI extends PongEntity {
     private Ball selectTargetBall(List<Ball> balls) {
         for (Ball ball : balls) {
             if (ball.getVelY() > 0) {
-                if (ball.getY() <= paddle.getY())
-                    return ball;
+                return ball;
             }
         }
         return null;

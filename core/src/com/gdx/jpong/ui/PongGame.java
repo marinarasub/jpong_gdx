@@ -20,7 +20,7 @@ import java.util.*;
 
 public class PongGame extends Game {
 
-	static final int TEST_BALLS = 0;
+	static final int TEST_BALLS = 0; // FOR AI SORT TEST
 
 	private float height;  // LOGICAL HEIGHT
 	private float width;
@@ -45,12 +45,12 @@ public class PongGame extends Game {
 		shape = new ShapeRenderer();
 		batch = new SpriteBatch();
 		balls = new LinkedList<>();
+		players();
+		gameTime = new Clock();
 		for (int i = 0; i < TEST_BALLS; i++) {
 			//balls.add(new Ball(300, 300, 10, 0, 0));
 			balls.add(randomBall());
 		}
-		players();
-		gameTime = new Clock();
 		song();
 		background();
 		scoreLabel();
@@ -59,9 +59,10 @@ public class PongGame extends Game {
 	}
 
 	private void players() {
-		player = new PongPlayer(new Paddle(200.f, 50));
+		float buffer = 50.f;
+		player = new PongPlayer(new Paddle(250.f, buffer));
 		player.setPaddleColor(Color.GREEN);
-		ai = new PongAI(new Paddle(200.f, getHeight() - 50));
+		ai = new PongAI(new Paddle(200.f, getHeight() - buffer));
 		ai.setPaddleColor(Color.RED);
 	}
 
@@ -77,7 +78,7 @@ public class PongGame extends Game {
 			float heightRatio = getHeight() / background.getHeight();
 			float widthRatio = getWidth() / background.getWidth();
 
-			if (heightRatio > widthRatio) {System.out.println(getHeight() / background.getHeight());
+			if (heightRatio > widthRatio) {
 				background.setScale(getHeight() / background.getHeight());
 				background.setPosition((getWidth() - background.getWidth()) / 2, 0);
 			} else {

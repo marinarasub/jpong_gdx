@@ -1,5 +1,6 @@
 package com.gdx.test;
 
+import com.badlogic.gdx.math.Vector2;
 import com.gdx.jpong.model.Ball;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -12,6 +13,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class BallTest {
 
     List<Ball> balls;
+    Vector2 origin = new Vector2(0, 0);
 
     @BeforeEach
     void setUp() {
@@ -27,44 +29,6 @@ class BallTest {
     }
 
     @Test
-    void testCompareCloserBallY() {
-        Ball b1 = new Ball(0, 1, 15.f, 0, 0);
-        Ball b2 = new Ball(0, 2, 15.f, 0, 0);
-        assertTrue(Ball.compareCloserBall(0, 0, b1, b2));
-        assertFalse(Ball.compareCloserBall(0, 0, b2, b1));
-    }
-
-    @Test
-    void testCompareCloserBallX() {
-        Ball b1 = new Ball(1, 0, 15.f, 0, 0);
-        Ball b2 = new Ball(2, 0, 15.f, 0, 0);
-        assertTrue(Ball.compareCloserBall(0, 0, b1, b2));
-        assertFalse(Ball.compareCloserBall(0, 0, b2, b1));
-    }
-
-    @Test
-    void testCompareCloserBall() {
-        Ball b1 = new Ball(1, 2, 15.f, 0, 0);
-        Ball b2 = new Ball(3, 0, 15.f, 0, 0);
-        Ball b3 = new Ball(0, -2, 15.f, 0, 0);
-        assertTrue(Ball.compareCloserBall(0, 0, b3, b2));
-        assertTrue(Ball.compareCloserBall(0, 0, b1, b2));
-        assertFalse(Ball.compareCloserBall(0, 0, b2, b1));
-    }
-
-    @Test
-    void testVerifySort() {
-        balls.add(new Ball(0, 0, 15.f, 0, 0));
-        balls.add(new Ball(0, 1, 15.f, 0, 0));
-        balls.add(new Ball(0, 2, 15.f, 0, 0));
-        balls.add(new Ball(1, 2, 15.f, 0, 0));
-        balls.add(new Ball(3, 0, 15.f, 0, 0));
-        balls.add(new Ball(0, 3, 15.f, 0, 0));
-
-        assertTrue(Ball.verifySortClose(0, 0, balls));
-    }
-
-    @Test
     void testMergeSort() {
         balls.add(new Ball(-9, 7, 15.f, 0, -2));
         balls.add(new Ball(0, 3, 15.f, 0, -4));
@@ -74,27 +38,13 @@ class BallTest {
         balls.add(new Ball(0, 1, 15.f, 0, 0));
         balls.add(new Ball(0, 9, 15.f, 0, 4));
 
-        List<Ball> sorted = Ball.sortByClosestYVelocity(0, balls);
+        List<Ball> sorted = Ball.sortByClosestVelY(0, balls);
         sorted.forEach(System.out::println);
-        assertTrue(Ball.verifySortCloseYVel(0, sorted));
+        assertTrue(Ball.verifySortCloseVelY(0, sorted));
     }
 
     @Test
-    void sortByClosestY() {
-        balls.add(new Ball(0, 2, 15.f, 0, 0));
-        balls.add(new Ball(2, 4, 15.f, 0, 0));
-        balls.add(new Ball(-4, 1, 15.f, 0, 0));
-        balls.add(new Ball(4, -9, 15.f, 0, 0));
-        balls.add(new Ball(0, 0, 15.f, 0, 0));
-        balls.add(new Ball(0, 1, 15.f, 0, 0));
-        assertFalse(balls.isEmpty());
-        Ball.sortByClosest(0, 0, balls);
-
-        assertTrue(Ball.verifySortClose(0, 0, balls));
-    }
-
-    @Test
-    void testVerifySortByClosestYVel() {
+    void testVerifySortByClosestVelY() {
         balls.add(new Ball(0, -5, 15.f, 0, 1));
         balls.add(new Ball(2, -7, 15.f, 0, 1));
         balls.add(new Ball(-4, -7, 15.f, 0, 1));
@@ -103,11 +53,11 @@ class BallTest {
         balls.add(new Ball(0, 3, 15.f, 0, 1));
         assertFalse(balls.isEmpty());
         balls.forEach(System.out::println);
-        assertTrue(Ball.verifySortCloseYVel(0, balls));
+        assertTrue(Ball.verifySortCloseVelY(0, balls));
     }
 
     @Test
-    void testVerifySortByClosestYVel2() {
+    void testVerifySortByClosestVelY2() {
         balls.add(new Ball(0, 3, 15.f, 0, -4));
         balls.add(new Ball(-9, 7, 15.f, 0, -2));
         balls.add(new Ball(2, 2, 15.f, 0, 6));
@@ -118,7 +68,7 @@ class BallTest {
 
         assertFalse(balls.isEmpty());
         balls.forEach(System.out::println);
-        assertTrue(Ball.verifySortCloseYVel(0, balls));
+        assertTrue(Ball.verifySortCloseVelY(0, balls));
     }
 
     @Test

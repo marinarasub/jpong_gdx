@@ -46,6 +46,10 @@ public class Ball extends GameObject {
         return color;
     }
 
+    public void setColor(Color color) {
+        this.color = color;
+    }
+
     //@Override
     public void update(float deltaTime, Paddle paddle) {
         super.update(deltaTime);
@@ -97,7 +101,7 @@ public class Ball extends GameObject {
      * @param paddle paddle to check collision with
      * @return true if collision
      */
-    private boolean handlePaddleCollision(float deltaTime, Paddle paddle) {
+    private boolean handlePaddleCollision(float deltaTime, Paddle paddle) { // TODO tidy
         float halfPaddleHeight = paddle.getHalfHeight();
         float halfPaddleWidth = paddle.getHalfWidth();
 
@@ -112,7 +116,7 @@ public class Ball extends GameObject {
             if (isYCollision(paddle, lenience)) {
                 //X VEL BASED ON dX from PADDLE CENTER
                 if (!immune) {
-                    hitSound.play(0.3f);
+                    playHitsound();
                     setVelocity(calculateNewVelocity(paddle, deltaX, getVelY()));
                     if (paddle.getY() < this.getY()) {
                         this.translate(0, intersectY);
@@ -124,7 +128,7 @@ public class Ball extends GameObject {
                 }
             } else { //if (this.y >= paddle.y - halfPaddleHeight && this.y <= paddle.y + halfPaddleHeight) {
                 if (!immune) {
-                    hitSound.play(0.3f);
+                    playHitsound();
                     reflectVelX();
                     // L OR R
                     if (paddle.getX() < this.getX()) {
@@ -137,6 +141,11 @@ public class Ball extends GameObject {
             return true;
         }
         return false;
+    }
+
+    private void playHitsound() {
+        if (hitSound != null)
+            hitSound.play(0.3f);
     }
 
     private void handleImmunity(Paddle paddle) {
@@ -205,38 +214,7 @@ public class Ball extends GameObject {
     }
 
 
-    // return new sorted list of balls order by closest euclidian distance to pos x, y
-    public static void sortByClosest(float x, float y, List<Ball> balls) {
-        while (true) {
-            boolean sorted = true;
-            for (int i = 1; i < balls.size()-1; i++) {
-                Ball b1 = balls.get(i-1);
-                Ball b2 = balls.get(i);
-                if (!compareCloserBall(x, y, b1, b2)) {
-                    Collections.swap(balls, i, i-1);
-                    sorted = false;
-                }
-            }
-            if (sorted) break;
-        }
-    }
-
-    public static void sortByClosestY(float y, List<Ball> balls) {
-        while (true) {
-            boolean sorted = true;
-            for (int i = 1; i < balls.size()-1; i++) {
-                Ball b1 = balls.get(i-1);
-                Ball b2 = balls.get(i);
-                if (!compareCloserBall(y, b1, b2)) {
-                    Collections.swap(balls, i, i-1);
-                    sorted = false;
-                }
-            }
-            if (sorted) break;
-        }
-    }
-
-    public static List<Ball> sortByClosestYVelocity(float y, List<Ball> balls) {
+    public static List<Ball> sortByClosestVelY(float y, List<Ball> balls) {
         return mergeSort(y, new LinkedList<>(balls));
     }
 
@@ -256,7 +234,7 @@ public class Ball extends GameObject {
         while (iLeft.hasNext() && iRight.hasNext()) {
             Ball bl = iLeft.next();
             Ball br = iRight.next();
-            if (compareCloserBallYVel(y, bl, br)) {
+            if (compareCloserVelY(y, bl, br)) {
                 merge.add(bl);
                 iLeft.remove();
             } else {
@@ -279,19 +257,6 @@ public class Ball extends GameObject {
         return merge;
     }
 
-    // return true if 1 is closer or equal, pythag.
-    public static boolean compareCloserBall(float x, float y, Ball ball1, Ball ball2) {
-        float ball1dist = ball1.position.len();
-        float ball2dist = ball2.position.len();
-        return ball1dist <= ball2dist;
-    }
-
-    public static boolean compareCloserBall(float y, Ball ball1, Ball ball2) {
-        float ball1dist = Math.abs(ball1.getY() - y);
-        float ball2dist = Math.abs(ball2.getY() - y);
-        return ball1dist <= ball2dist;
-    }
-
     /**
      * REQUIRES: y velocity is not 0
      * Compare two balls using their velocity and current position relative to a y position
@@ -300,7 +265,7 @@ public class Ball extends GameObject {
      * @param ball2
      * @return true if ball1 will reach pos (~, y) sooner
      */
-    public static boolean compareCloserBallYVel(float y, Ball ball1, Ball ball2) {
+    public static boolean compareCloserVelY(float y, Ball ball1, Ball ball2) {
         float ball1Ratio = (ball1.getY() - y) / -ball1.getVelY();
         float ball2Ratio = (ball2.getY() - y) / -ball2.getVelY();
         boolean ball1closer;
@@ -314,17 +279,9 @@ public class Ball extends GameObject {
         return ball1closer;
     }
 
-    public static boolean verifySortClose(float x, float y, List<Ball> balls) {
+    public static boolean verifySortCloseVelY(float y, List<Ball> balls) {
         for (int i = 0; i < balls.size()-2; i++) {
-            if(!compareCloserBall(x, y, balls.get(i), balls.get(i+1)))
-                return false;
-        }
-        return true;
-    }
-
-    public static boolean verifySortCloseYVel(float y, List<Ball> balls) {
-        for (int i = 0; i < balls.size()-2; i++) {
-            if(!compareCloserBallYVel(y, balls.get(i), balls.get(i+1)))
+            if(!compareCloserVelY(y, balls.get(i), balls.get(i+1)))
                 return false;
         }
         return true;
