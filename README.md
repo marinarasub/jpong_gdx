@@ -9,4 +9,4 @@ cool game hooray
 
 ## Known Issues
 - high velocity will phase through collision
-- AI struggles at low framerates
+- AI struggles at low framerates (wontfix: uses fixed timestep)
