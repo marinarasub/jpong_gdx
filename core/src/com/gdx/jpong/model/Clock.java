@@ -28,10 +28,6 @@ public class Clock {
         timeElapsed = 0;
     }
 
-    public float getDeltaTime() {
-        return Gdx.graphics.getDeltaTime();
-    }
-
     public float getTimeElapsed() {
         return timeElapsed;
     }
@@ -52,9 +48,9 @@ public class Clock {
     }
 
     // REQUIRES: called every render update in main game loop
-    public void update() {
+    public void update(float delta) {
         if (!paused) {
-            timeElapsed += getDeltaTime();
+            timeElapsed += delta;
         }
     }
 
