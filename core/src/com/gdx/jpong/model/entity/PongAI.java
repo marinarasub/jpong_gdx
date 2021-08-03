@@ -9,7 +9,7 @@ import java.util.List;
 public class PongAI extends PongEntity {
 
     private float maxSpeed; // how fast this boi move side 2 side like a boss
-    private int maxError; // +- exact x position
+    private float maxError; // +- exact x position
     private int updatePrecison; // how many updates/step to check REQUIRES > 0
     private float reaction;
 
@@ -18,7 +18,7 @@ public class PongAI extends PongEntity {
     public PongAI(final Paddle paddle) {
         super(paddle);
         this.maxSpeed = 5000.f;
-        this.maxError = ((int) paddle.getHalfWidth() / 2);
+        this.maxError = paddle.getHalfWidth();
         this.reaction = 1.1f;
         this.updatePrecison = 60;
     }

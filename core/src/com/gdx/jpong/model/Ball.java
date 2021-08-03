@@ -10,6 +10,8 @@ import java.util.*;
 
 public class Ball extends GameObject {
 
+    static final String SOUND = "audio/sounds/soft-hitclap.wav";
+
     private Sound hitSound;
 
     private float radius;
@@ -21,7 +23,15 @@ public class Ball extends GameObject {
         super(x, y, velX, velY);
         this.radius = radius;
         this.color = Color.LIGHT_GRAY;
-        hitSound = Gdx.audio.newSound(Gdx.files.internal("audio/sounds/soft-hitclap.wav"));
+        hitSound = Gdx.audio.newSound(Gdx.files.internal(SOUND));
+        immune = true;
+    }
+
+    public Ball(float x, float y, float radius, float velX, float velY, float accX, float accY) {
+        super(x, y, velX, velY, accX, accY);
+        this.radius = radius;
+        this.color = Color.LIGHT_GRAY;
+        hitSound = Gdx.audio.newSound(Gdx.files.internal(SOUND));
         immune = true;
     }
 

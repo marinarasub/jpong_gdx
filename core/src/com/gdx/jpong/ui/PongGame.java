@@ -97,12 +97,16 @@ public class PongGame extends Game {
 	}
 
 	private void song() {
-//		music = new SongMap("Kano - Stella-rium.mp3", gameTime);
-//		music.setBpm(177.f);
-//		music.setStartOffset(0.951f);
-		songMap = new SongMap("ParagonX9 - Chaoz Fantasy.mp3", gameTime);
-		songMap.setBpm(162.35f);
-		songMap.setStartOffset(0.958f);
+//		songMap = new SongMap("Kano - Stella-rium.mp3", gameTime);
+//		songMap.setBpm(177.f);
+//		songMap.setStartOffset(0.951f);
+//		songMap = new SongMap("ParagonX9 - Chaoz Fantasy.mp3", gameTime);
+//		songMap.setBpm(162.35f);
+//		songMap.setStartOffset(0.958f);
+		songMap = new SongMap("DM DOKURO - SAVE (Encore).mp3", gameTime);
+		songMap.setBpm(180.f);
+		songMap.setStartOffset(0.476f);
+
 		songMap.setBackground(new Texture("images/70858371_p0_master1200.jpg")); // TEST LANDSCAPE
 		//songMap.setBackground(new Texture("images/89136015_p0.jpg")); // TEST PORTRAIT
 		songMap.setBackgroundDim(0.75f);
@@ -123,8 +127,10 @@ public class PongGame extends Game {
 				15.f, // TODO const ball radius
 				10 * (r.nextFloat() - 0.5f),
 				gameTime.getTimeElapsedSeconds() % 2 == 1 ?
-						velMultiplier * (r.nextFloat()) + 100.f
-						: velMultiplier * (-r.nextFloat()) - 100.f);
+						velMultiplier * (r.nextFloat()) + 150.f
+						: velMultiplier * (-r.nextFloat()) - 150.f,
+				50.f * (r.nextFloat() - 0.5f),
+				0);
 	}
 
 	public int getHeight() {
@@ -150,6 +156,7 @@ public class PongGame extends Game {
 
 	@Override
 	public void render() {
+		super.render();
 		fixedUpdate(gameTime.getDeltaTime());
 		update(gameTime.getDeltaTime());
 		clear();
@@ -194,6 +201,7 @@ public class PongGame extends Game {
 		songMap.update();
 		if (songMap.isWaiting()) { // TODO
 			songMap.endWaiting();
+			//if (balls.size() == 0)
 			balls.add(randomBall());
 		}
 	}

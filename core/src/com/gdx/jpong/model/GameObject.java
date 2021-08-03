@@ -7,16 +7,26 @@ public abstract class GameObject {
 
     protected Vector2 position;
     protected Vector2 velocity;
+    protected Vector2 acceleration;
 
     public GameObject(float x, float y) {
         this.position = new Vector2(x, y);
         this.velocity = new Vector2(0, 0);
+        this.acceleration = new Vector2(0, 0);
     }
 
     public GameObject(float x, float y, float velX, float velY) {
         this.position = new Vector2(x, y);
         this.velocity = new Vector2(velX, velY);
+        this.acceleration = new Vector2(0, 0);
     }
+
+    public GameObject(float x, float y, float velX, float velY, float accX, float accY) {
+        this.position = new Vector2(x, y);
+        this.velocity = new Vector2(velX, velY);
+        this.acceleration = new Vector2(accX, accY);
+    }
+
     public float getX() {
         return position.x;
     }
@@ -73,9 +83,18 @@ public abstract class GameObject {
         return velocity.y * deltaTime;
     }
 
+    public float scaleAccX(float deltaTime) {
+        return acceleration.x * deltaTime;
+    }
+
+    public float scaleAccY(float deltaTime) {
+        return acceleration.y * deltaTime;
+    }
+
     public abstract void draw(ShapeRenderer shape);
 
     public void update(float deltaTime) {
         position.add(scaleVelX(deltaTime), scaleVelY(deltaTime));
+        velocity.add(scaleAccX(deltaTime), scaleAccY(deltaTime));
     }
 }
