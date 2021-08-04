@@ -86,10 +86,9 @@ public class SongMap {
 
     public void update() {
         if (!start) {
-            if (lastInterval() >= startOffset) {
+            if (timer.getTimeElapsed() >= startOffset) {
                 start = true;
-                return;
-            }
+            } else return;
         }
         if (lastInterval() >= getTimePerBeat()) {
             waiting = true;

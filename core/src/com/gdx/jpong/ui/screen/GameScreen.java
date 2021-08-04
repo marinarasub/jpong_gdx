@@ -11,6 +11,7 @@ import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.gdx.jpong.model.Ball;
 import com.gdx.jpong.model.Clock;
 import com.gdx.jpong.model.Paddle;
@@ -56,6 +57,9 @@ public class GameScreen implements Screen {
     private BitmapFont scoreLabel;
     private Sprite background;
 
+    // INPUT
+    private Stage stage;
+
     // MAP
     private SongMap songMap;
 
@@ -67,6 +71,7 @@ public class GameScreen implements Screen {
 
         shape = new ShapeRenderer();
         batch = new SpriteBatch();
+        stage = new Stage();
 
         balls = new LinkedList<>();
         players();
@@ -76,6 +81,7 @@ public class GameScreen implements Screen {
             //balls.add(new Ball(300, 300, 10, 0, 0));
             balls.add(randomBall());
         }
+        Gdx.input.setInputProcessor(stage);
 
         song();
         background();
@@ -127,9 +133,12 @@ public class GameScreen implements Screen {
 //		songMap = new SongMap("ParagonX9 - Chaoz Fantasy.mp3", gameTime);
 //		songMap.setBpm(162.35f);
 //		songMap.setStartOffset(0.958f);
-        songMap = new SongMap("DM DOKURO - SAVE (Encore).mp3", gameTime);
-        songMap.setBpm(180.f);
-        songMap.setStartOffset(0.476f);
+//        songMap = new SongMap("DM DOKURO - SAVE (Encore).mp3", gameTime);
+//        songMap.setBpm(180.f);
+//        songMap.setStartOffset(0.476f);
+        songMap = new SongMap("dj TAKA - quaver.mp3", gameTime);
+        songMap.setBpm(186.f);
+        songMap.setStartOffset(1.198f);
 
         songMap.setBackground(new Texture("images/70858371_p0_master1200.jpg")); // TEST LANDSCAPE
         //songMap.setBackground(new Texture("images/89136015_p0.jpg")); // TEST PORTRAIT
@@ -138,7 +147,7 @@ public class GameScreen implements Screen {
         songMap.start();
         songMap.setOnCompletionListener(music -> {
             dispose();
-            game.exit();
+            game.menu();
         });
     }
 
@@ -329,6 +338,5 @@ public class GameScreen implements Screen {
     @Override
     public void dispose() {
         // TODO free
-        game.exit();
     }
 }
