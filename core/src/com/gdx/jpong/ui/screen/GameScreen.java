@@ -47,6 +47,9 @@ public class GameScreen implements Screen {
     private ShapeRenderer shape;
     private SpriteBatch batch;
 
+    // GAME STATE
+    private boolean running = true;
+
     // OBJECTS & ENTITIES
     private List<Ball> balls;
     private PongPlayer player;
@@ -145,10 +148,7 @@ public class GameScreen implements Screen {
         songMap.setBackgroundDim(0.75f);
 
         songMap.start();
-        songMap.setOnCompletionListener(music -> {
-            dispose();
-            game.menu();
-        });
+        songMap.setOnCompletionListener(music -> game.menu());
     }
 
 
@@ -180,8 +180,11 @@ public class GameScreen implements Screen {
 
     @Override
     public void render(float delta) {
-        fixedUpdate(delta);
-        update(delta);
+        handleInput();
+        if (running) {
+            fixedUpdate(delta);
+            update(delta);
+        }
         clear();
         renderBackground();
         renderGraphics();
@@ -244,10 +247,9 @@ public class GameScreen implements Screen {
 
     public void update(float deltaTime) {
         handleTime(deltaTime);
-        handleMouseInput();
-        handleOutOfBounds();
         player.update(deltaTime);
         ai.update(deltaTime, balls);
+        handleOutOfBounds();
     }
 
     private void handleOutOfBounds() {
@@ -274,18 +276,21 @@ public class GameScreen implements Screen {
         }
     }
 
-    private void handleMouseInput() {
-        if (Gdx.input.isButtonPressed(Input.Keys.LEFT)) {
+    private void handleInput() {
+        if (Gdx.input.isButtonJustPressed(Input.Keys.LEFT)) {
             balls.add(randomBall());
         }
-        if (Gdx.input.isKeyPressed(Input.Keys.A)) {
-            balls.forEach(System.out::println);
+//        if (Gdx.input.isKeyJustPressed(Input.Keys.A)) {
+//            balls.forEach(System.out::println);
+//        }
+        if (Gdx.input.isKeyJustPressed(Input.Keys.P)) {
+            if (running)
+                pause();
+            else
+                resume();
         }
-        if (Gdx.input.isKeyPressed(Input.Keys.P)) {
-            pause(); // TODO
-        }
-        if (Gdx.input.isKeyPressed(Input.Keys.ESCAPE)) {
-            dispose();
+        if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) {
+            game.exit();
         }
     }
 
@@ -322,12 +327,14 @@ public class GameScreen implements Screen {
 
     @Override
     public void pause() {
-
+        songMap.pause();
+        running = false;
     }
 
     @Override
     public void resume() {
-
+        songMap.resume();
+        running = true;
     }
 
     @Override
@@ -338,5 +345,9 @@ public class GameScreen implements Screen {
     @Override
     public void dispose() {
         // TODO free
+        songMap.dispose();
+        scoreLabel.dispose();
+        shape.dispose();
+        batch.dispose();
     }
 }

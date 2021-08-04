@@ -19,7 +19,7 @@ public class MainMenuScreen implements Screen {
     private PongGame game;
 
 
-    private SpriteBatch batch;
+    //private SpriteBatch batch;
     private Table menuTable;
     private TextButton playButton, exitButton;
 
@@ -27,7 +27,7 @@ public class MainMenuScreen implements Screen {
 
     public MainMenuScreen(PongGame game) {
         this.game = game;
-        batch = new SpriteBatch();
+        //batch = new SpriteBatch();
         stage = new Stage();
         menuTable = new Table();
         Gdx.input.setInputProcessor(stage);
@@ -112,6 +112,6 @@ public class MainMenuScreen implements Screen {
 
     @Override
     public void dispose() {
-
+        // TODO free
     }
 }

@@ -4,9 +4,6 @@ import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.gdx.jpong.ui.screen.GameScreen;
 import com.gdx.jpong.ui.screen.MainMenuScreen;
-
-import java.util.*;
-
 public class PongGame extends Game {
 
 	private MainMenuScreen menuScreen;
@@ -19,8 +16,15 @@ public class PongGame extends Game {
 	}
 
 	public void menu() {
+		disposeCurrentScreen();
 		menuScreen = new MainMenuScreen(this);
 		setScreen(menuScreen);
+	}
+
+	public void play() {
+		disposeCurrentScreen();
+		game = new GameScreen(this);
+		setScreen(game);
 	}
 
 	@Override
@@ -28,9 +32,10 @@ public class PongGame extends Game {
 		super.render();
 	}
 
-	public void play() {
-		game = new GameScreen(this);
-		setScreen(game);
+	private void disposeCurrentScreen() {
+		if (screen != null)
+			screen.dispose();
+		System.gc();
 	}
 
 	public void exit() {

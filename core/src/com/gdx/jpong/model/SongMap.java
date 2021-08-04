@@ -96,9 +96,21 @@ public class SongMap {
         }
     }
 
+    public void pause() {
+        music.pause();
+    }
+
+    public void resume() {
+        music.play();
+    }
 
     public void setOnCompletionListener(Music.OnCompletionListener listener) {
         music.setOnCompletionListener(listener);
+    }
+
+    public void dispose() {
+        music.dispose();
+        background.dispose();
     }
 
 }

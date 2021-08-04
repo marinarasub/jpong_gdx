@@ -33,7 +33,7 @@ public class PongAI extends PongEntity {
     }
 
     private float scaleSpeed(float distanceX) {
-        return (float) (maxSpeed * Math.pow(distanceX / (Gdx.graphics.getWidth() - paddle.getHalfWidth()), reaction));
+        return (float) (maxSpeed * Math.pow(distanceX / (Gdx.graphics.getWidth() - paddle.getWidth()), reaction));
     }
 
     private void predict(float deltaTime, List<Ball> inList) {
