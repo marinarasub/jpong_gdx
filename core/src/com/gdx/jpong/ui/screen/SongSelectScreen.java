@@ -27,7 +27,7 @@ public class SongSelectScreen extends GameScreen implements Screen, InputProcess
 
     @Override
     public void show() {
-
+        Gdx.input.setInputProcessor(multiInput);
     }
 
     @Override
@@ -59,7 +59,7 @@ public class SongSelectScreen extends GameScreen implements Screen, InputProcess
 
     @Override
     public void hide() {
-
+        Gdx.input.setInputProcessor(null);
     }
 
     @Override

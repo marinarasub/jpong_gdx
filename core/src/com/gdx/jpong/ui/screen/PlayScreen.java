@@ -2,6 +2,7 @@ package com.gdx.jpong.ui.screen;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
+import com.badlogic.gdx.InputAdapter;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
@@ -79,7 +80,6 @@ public class PlayScreen extends GameScreen implements Screen {
             //balls.add(new Ball(300, 300, 10, 0, 0));
             balls.add(randomBall());
         }
-       //Gdx.input.setInputProcessor(stage);
 
         song(song);
         background();
@@ -164,7 +164,6 @@ public class PlayScreen extends GameScreen implements Screen {
 
     @Override
     public void render(float delta) {
-        handleInput();
         if (running) {
             fixedUpdate(delta);
             update(delta);
@@ -260,6 +259,9 @@ public class PlayScreen extends GameScreen implements Screen {
         }
     }
 
+    /**
+     * @deprecated
+     */
     private void handleInput() {
 //        if (Gdx.input.isButtonJustPressed(Input.Keys.LEFT)) {
 //            balls.add(randomBall());
@@ -267,16 +269,7 @@ public class PlayScreen extends GameScreen implements Screen {
 //        if (Gdx.input.isKeyJustPressed(Input.Keys.A)) {
 //            balls.forEach(System.out::println);
 //        }
-        if (Gdx.input.isKeyJustPressed(Input.Keys.P)) {
-            if (running)
-                pause();
-            else
-                resume();
-        }
-        if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) {
-            dispose();
-            game.menu();
-        }
+
     }
 
     private Ball randomBall() {
@@ -302,7 +295,23 @@ public class PlayScreen extends GameScreen implements Screen {
 
     @Override
     public void show() {
-        //Gdx.input.setInputProcessor();
+        Gdx.input.setInputProcessor(new InputAdapter() {
+            @Override
+            public boolean keyDown (int keycode) {
+                if (keycode == Input.Keys.P) {
+                    if (running)
+                        pause();
+                    else
+                        resume();
+                }
+                if (keycode == Input.Keys.ESCAPE) {
+                    dispose();
+                    game.menu();
+                }
+                return true;
+            }
+
+        });
     }
 
     @Override

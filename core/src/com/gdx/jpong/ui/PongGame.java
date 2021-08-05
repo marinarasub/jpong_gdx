@@ -12,8 +12,6 @@ import com.gdx.jpong.ui.screen.SongSelectScreen;
 public class PongGame extends Game {
 
 	private Preferences prefs;
-	private MainMenuScreen menuScreen;
-	private SongSelectScreen songSelect;
 	private PlayScreen game;
 
 	@Override
@@ -21,17 +19,12 @@ public class PongGame extends Game {
 		prefs = Gdx.app.getPreferences("config.xml");
 		Gdx.graphics.setResizable(true);
 		loadSettings();
-		newMenu();
 		menu();
 	}
 
-	private void newMenu() {
-		menuScreen = new MainMenuScreen(this);
-		songSelect = new SongSelectScreen(this);
-	}
 
 	public void menu() {
-		setScreen(menuScreen);
+		setScreen(new MainMenuScreen(this));
 	}
 
 	public void play() {
@@ -44,7 +37,7 @@ public class PongGame extends Game {
 	}
 
 	public void songSelect() {
-		setScreen(songSelect);
+		setScreen(new SongSelectScreen(this));
 	}
 
 	@Override

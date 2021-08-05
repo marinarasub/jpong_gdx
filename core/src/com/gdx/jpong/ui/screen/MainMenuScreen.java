@@ -68,7 +68,7 @@ public class MainMenuScreen extends GameScreen implements Screen {
         optionsButton.addListener(new ClickListener() {
             @Override
             public void touchUp(InputEvent e, float x, float y, int point, int button) {
-                // TODO
+                Gdx.app.log("BUTTON", "Options clicked");
             }
         });
     }
@@ -119,7 +119,7 @@ public class MainMenuScreen extends GameScreen implements Screen {
 
     @Override
     public void hide() {
-
+        Gdx.input.setInputProcessor(null);
     }
 
     @Override
