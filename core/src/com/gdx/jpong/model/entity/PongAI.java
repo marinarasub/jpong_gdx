@@ -45,7 +45,7 @@ public class PongAI extends PongEntity {
             if (target != null) {
                 Ball sim = aimAtBall(deltaTime, target, paddleYAim);
                 float deltaX = sim.getX() - paddle.getX();
-                trackX(deltaX, (float) (maxError * Math.random()));
+                trackX(deltaX, (float) (maxError * Math.random() + 0.5f));
             } else {
                 trackX(Gdx.graphics.getWidth() / 2 - paddle.getX() - paddle.getHalfWidth(), maxError);
             }

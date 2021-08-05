@@ -11,8 +11,7 @@ import java.util.*;
 public class Ball extends GameObject {
 
     static final String SOUND = "audio/sounds/soft-hitclap.wav";
-
-    private Sound hitSound;
+    static final Sound hitSound = Gdx.audio.newSound(Gdx.files.internal(SOUND));
 
     private float radius;
     private boolean immune; // ignore collision to paddles
@@ -23,7 +22,6 @@ public class Ball extends GameObject {
         super(x, y, velX, velY);
         this.radius = radius;
         this.color = Color.LIGHT_GRAY;
-        hitSound = Gdx.audio.newSound(Gdx.files.internal(SOUND));
         immune = true;
     }
 
@@ -31,7 +29,6 @@ public class Ball extends GameObject {
         super(x, y, velX, velY, accX, accY);
         this.radius = radius;
         this.color = Color.LIGHT_GRAY;
-        hitSound = Gdx.audio.newSound(Gdx.files.internal(SOUND));
         immune = true;
     }
 
@@ -40,7 +37,7 @@ public class Ball extends GameObject {
         super(b.getX(), b.getY(), b.getVelX(), b.getVelY());
         this.radius = b.getRadius();
         this.color = b.getColor();
-        this.hitSound = b.hitSound;
+        //this.hitSound = b.hitSound;
         this.immune = b.isImmune();
     }
 
@@ -194,13 +191,14 @@ public class Ball extends GameObject {
         float leftX = getX() - getRadius();
         float rightX = getX() + getRadius();
         float addVelX = scaleVelX(deltaTime);
-        if (leftX + addVelX <= 0 || rightX + addVelX >= Gdx.graphics.getWidth()) {
+        int wall = 0;
+        if (leftX + addVelX <= wall || rightX + addVelX >= Gdx.graphics.getWidth() - wall) {
             //hitSound.play(0.3f);
             setVelX(-getVelX());
-            if (leftX + addVelX <= 0) {
-                setX(0 + radius);
+            if (leftX + addVelX <= wall) {
+                setX(wall + radius);
             } else {
-                setX(Gdx.graphics.getWidth() - getRadius());
+                setX(Gdx.graphics.getWidth() - wall - getRadius());
             }
         }
 //        if (y - radius < 0 || y + radius > Gdx.graphics.getHeight()) {

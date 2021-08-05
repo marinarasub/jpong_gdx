@@ -11,22 +11,19 @@ import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.Align;
+import com.gdx.jpong.model.SongMap;
 import com.gdx.jpong.ui.PongGame;
 
-public class MainMenuScreen implements Screen {
-
-    // GAME class
-    private PongGame game;
-
+public class MainMenuScreen extends GameScreen implements Screen {
 
     //private SpriteBatch batch;
     private Table menuTable;
-    private TextButton playButton, exitButton;
+    private TextButton playButton, exitButton, optionsButton;
 
     private Stage stage;
 
     public MainMenuScreen(PongGame game) {
-        this.game = game;
+        super(game);
         //batch = new SpriteBatch();
         stage = new Stage();
         menuTable = new Table();
@@ -34,9 +31,11 @@ public class MainMenuScreen implements Screen {
 
         Skin skin = new Skin(Gdx.files.internal("uiskin.json"));
         playButton(skin);
+        optionsButton(skin);
         exitButton(skin);
-        menuTable.add(playButton).width(200f).height(50f).space(10f).expandX().center().row();
-        menuTable.add(exitButton).width(200f).height(50f).space(10f).expandX().center().row();
+        menuTable.add(playButton).width(300f).height(60f).space(10f).expandX().center().row();
+        menuTable.add(optionsButton).width(300f).height(60f).space(10f).expandX().center().row();
+        menuTable.add(exitButton).width(300f).height(60f).space(10f).expandX().center().row();
         menuTable.setFillParent(true);
         stage.addActor(menuTable);
     }
@@ -46,6 +45,8 @@ public class MainMenuScreen implements Screen {
         playButton.addListener(new ClickListener() {
             @Override
             public void touchUp(InputEvent e, float x, float y, int point, int button) {
+                //game.songSelect();
+                Gdx.app.log("BUTTON", "Play clicked");
                 game.play();
             }
         });
@@ -56,7 +57,18 @@ public class MainMenuScreen implements Screen {
         exitButton.addListener(new ClickListener() {
             @Override
             public void touchUp(InputEvent e, float x, float y, int point, int button) {
+                Gdx.app.log("BUTTON", "Exit clicked");
                 game.exit();
+            }
+        });
+    }
+
+    private void optionsButton(Skin skin) {
+        optionsButton = new TextButton("OPTIONS", skin);
+        optionsButton.addListener(new ClickListener() {
+            @Override
+            public void touchUp(InputEvent e, float x, float y, int point, int button) {
+                // TODO
             }
         });
     }
@@ -72,7 +84,7 @@ public class MainMenuScreen implements Screen {
 
     @Override
     public void show() {
-
+        Gdx.input.setInputProcessor(stage);
     }
 
     @Override
@@ -113,5 +125,6 @@ public class MainMenuScreen implements Screen {
     @Override
     public void dispose() {
         // TODO free
+        stage.dispose();
     }
 }

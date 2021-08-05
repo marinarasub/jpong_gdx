@@ -3,12 +3,10 @@ package com.gdx.jpong.model;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.scenes.scene2d.ui.Image;
 
 public class SongMap {
 
     static final String AUDIO_PATH = "audio/";
-
     private Clock timer;
 
     private Music music;
@@ -18,7 +16,7 @@ public class SongMap {
     private float lastTime;
 
     private Texture background;
-    private float backgroundDim;
+    private float backgroundDim = 0.5f;
 
     private boolean waiting; // waiting to spawn
 
@@ -27,9 +25,12 @@ public class SongMap {
         this.timer = new Clock();
     }
 
-    public SongMap(String songName, Clock timer) {
-        this.music =  Gdx.audio.newMusic(Gdx.files.internal(AUDIO_PATH + songName));
-        this.timer = timer;
+    public float getTime() {
+        return music.getPosition();
+    }
+
+    public String getClockTime() {
+        return timer.getDisplayTime();
     }
 
     public void setBackgroundDim(float backgroundDim) {
@@ -53,7 +54,7 @@ public class SongMap {
     }
 
     public void endWaiting() {
-        lastTime = timer.getTimeElapsed();
+        lastTime = music.getPosition();
         music.play();
         waiting = false;
     }
@@ -80,13 +81,14 @@ public class SongMap {
     }
 
     public float lastInterval() {
-        float curTime = timer.getTimeElapsed();
+        float curTime = music.getPosition();
         return curTime - lastTime;
     }
 
-    public void update() {
+    public void update(float delta) {
+        timer.update(music.getPosition());
         if (!start) {
-            if (timer.getTimeElapsed() >= startOffset) {
+            if (music.getPosition() >= startOffset) {
                 start = true;
             } else return;
         }
@@ -110,7 +112,8 @@ public class SongMap {
 
     public void dispose() {
         music.dispose();
-        background.dispose();
+        if (background != null)
+            background.dispose();
     }
 
 }
