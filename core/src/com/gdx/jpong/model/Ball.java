@@ -3,6 +3,9 @@ package com.gdx.jpong.model;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.Sprite;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Vector2;
 
@@ -10,11 +13,14 @@ import java.util.*;
 
 public class Ball extends GameObject {
 
-    static final String SOUND = "audio/sounds/soft-hitclap.wav";
+    static final String SOUND = "sounds/soft-hitclap.wav";
     static final Sound hitSound = Gdx.audio.newSound(Gdx.files.internal(SOUND));
+    static final Texture texture = new Texture(Gdx.files.internal("textures/ball.png"));
 
+    private SpriteBatch batch;
+    private Sprite sprite;
     private float radius;
-    private boolean immune; // ignore collision to paddles
+    private boolean immune = true; // ignore collision to paddles
 
     private Color color;
 
@@ -22,14 +28,18 @@ public class Ball extends GameObject {
         super(x, y, velX, velY);
         this.radius = radius;
         this.color = Color.LIGHT_GRAY;
-        immune = true;
+        this.batch = new SpriteBatch();
+        this.sprite = new Sprite(texture);
+        sprite.setSize(radius * 2, radius * 2);
     }
 
     public Ball(float x, float y, float radius, float velX, float velY, float accX, float accY) {
         super(x, y, velX, velY, accX, accY);
         this.radius = radius;
         this.color = Color.LIGHT_GRAY;
-        immune = true;
+        this.batch = new SpriteBatch();
+        this.sprite = new Sprite(texture);
+        sprite.setSize(radius * 2, radius * 2);
     }
 
     // copy object
@@ -38,6 +48,8 @@ public class Ball extends GameObject {
         this.radius = b.getRadius();
         this.color = b.getColor();
         //this.hitSound = b.hitSound;
+        this.batch = b.batch;
+        this.sprite = b.sprite;
         this.immune = b.isImmune();
     }
 
@@ -78,25 +90,6 @@ public class Ball extends GameObject {
         }
         return 0;
     }
-
-    // DEPRECATED: will not push balls, use fixed timestep instead
-//    private boolean handlePaddleCollision(float deltaTime, Paddle paddle) {
-//        float deltaX = this.getX() - paddle.getX();
-//        float deltaY = this.getY() - paddle.getY();
-//        float halfHeight = paddle.getHalfHeight();
-//        float outerX = halfHeight + getRadius();
-//        float lenience = getRadius() / 2;
-//
-//        if (isYCollision(paddle, lenience)) {
-//            if (Math.abs(deltaY) - halfHeight - getRadius() < Math.abs(scaleVelY(deltaTime))) {
-//                //setX();
-//                setY(paddle.getY() + (getVelY() > 0 ? -outerX : outerX));
-//                setVelocity(calculateNewVelocity(paddle, deltaX, getVelY()));
-//                return true;
-//            }
-//        }
-//        return false;
-//    }
 
     private boolean isYCollision(Paddle paddle, float lenience) {
         float halfPaddleWidth = paddle.getHalfWidth();
@@ -210,6 +203,11 @@ public class Ball extends GameObject {
     public void draw(ShapeRenderer shape) {
         shape.setColor(getColor());
         shape.circle(getX(), getY(), getRadius());
+//        batch.begin();
+//        sprite.setPosition(getX(), getY());
+//        sprite.setOriginCenter();
+//        sprite.draw(batch);
+//        batch.end();
     }
 
     /**

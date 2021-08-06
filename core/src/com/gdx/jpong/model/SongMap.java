@@ -4,27 +4,37 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.graphics.Texture;
 
+import java.util.HashMap;
+
 public class SongMap {
 
     static final String AUDIO_PATH = "audio/";
     private Clock timer;
 
+    // INFO
     private Music music;
+    private String title;
+    private String artist;
     private float bpm = 1; // CANNOT BE 0
+
+    // TIMING
     private float startOffset = 0;
     private boolean start = false;
     private float lastTime;
 
+    // SPAWNS
+    private HashMap<Float, Ball> spawns; // KEY: spawn time (after offset), VALUE: Ball to be spawned.
+
+    // VISUAL
     private Texture background;
     private float backgroundDim = 0.5f;
 
-    private boolean waiting; // waiting to spawn
+    private boolean waitingSpawn; // waiting to spawn
 
     public SongMap(String songName) {
         this.music = Gdx.audio.newMusic(Gdx.files.internal(AUDIO_PATH + songName));
         this.timer = new Clock();
     }
-
     public float getTime() {
         return music.getPosition();
     }
@@ -49,14 +59,14 @@ public class SongMap {
         return background;
     }
 
-    public boolean isWaiting() {
-        return waiting;
+    public boolean isWaitingSpawn() {
+        return waitingSpawn;
     }
 
-    public void endWaiting() {
+    public void acknowledgeSpawn() {
         lastTime = music.getPosition();
         music.play();
-        waiting = false;
+        waitingSpawn = false;
     }
 
     public void setBpm(float bpm) {
@@ -93,7 +103,7 @@ public class SongMap {
             } else return;
         }
         if (lastInterval() >= getTimePerBeat()) {
-            waiting = true;
+            waitingSpawn = true;
             music.pause();
         }
     }

@@ -12,9 +12,7 @@ import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
-import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.gdx.jpong.model.Ball;
-import com.gdx.jpong.model.Clock;
 import com.gdx.jpong.model.Paddle;
 import com.gdx.jpong.model.SongMap;
 import com.gdx.jpong.model.entity.PongAI;
@@ -188,7 +186,7 @@ public class PlayScreen extends GameScreen implements Screen {
                         + "\nPSCORE: " + player.getScore()
                         + "\nAISCORE: " + ai.getScore()
                         + "\nTOTAL SCORE: " + (player.getScore() - ai.getScore())
-                        + "\n" + songMap.getTime(),
+                        + "\n" + songMap.getClockTime(),
                         //+ "\n" + songMap.getClockTime(),
                 20,
                 getHeight() - 20);
@@ -203,16 +201,12 @@ public class PlayScreen extends GameScreen implements Screen {
         shape.end();
     }
 
-    private void clear() {
-        Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
-    }
-
     /* UPDATE HANDLING */
 
     private void handleTime(float deltaTime) {
         songMap.update(deltaTime);
-        if (songMap.isWaiting()) { // TODO
-            songMap.endWaiting();
+        if (songMap.isWaitingSpawn()) { // TODO
+            songMap.acknowledgeSpawn();
             //if (balls.size() == 0)
             balls.add(randomBall());
         }
@@ -281,7 +275,7 @@ public class PlayScreen extends GameScreen implements Screen {
                         0 + player.getPaddle().getHeight()
                         : getHeight() - 0 - ai.getPaddle().getHeight(), // TODO set const
                 // for 50
-                18.f, // TODO const ball radius
+                16.f, // TODO const ball radius
                 10 * (r.nextFloat() - 0.5f),
                 (int) songMap.getTime() % 2 == 1 ?
                         velMultiplier * (r.nextFloat()) + 150.f

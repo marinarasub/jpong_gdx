@@ -46,7 +46,7 @@ public class SongEndScreen extends GameScreen implements Screen {
         replayButton.addListener(new ClickListener() {
             @Override
             public void touchUp(InputEvent e, float x, float y, int point, int button) {
-                //game.songSelect();
+                super.touchUp(e, x, y, point, button);
                 dispose();
                 game.play();
             }
@@ -58,7 +58,7 @@ public class SongEndScreen extends GameScreen implements Screen {
         menuButton.addListener(new ClickListener() {
             @Override
             public void touchUp(InputEvent e, float x, float y, int point, int button) {
-                //game.songSelect();
+                super.touchUp(e, x, y, point, button);
                 dispose();
                 game.menu();
             }
@@ -77,10 +77,6 @@ public class SongEndScreen extends GameScreen implements Screen {
 
         stage.act(delta);
         stage.draw();
-    }
-
-    private void clear() {
-        Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
     }
 
     @Override

@@ -2,11 +2,18 @@ package com.gdx.jpong.model;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.Sprite;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 
 public class Paddle extends GameObject {
 
     static final int PADDLE_HEIGHT = 20;
+    static final Texture texture = new Texture(Gdx.files.internal("textures/paddle.png"));
+
+    private SpriteBatch batch;
+    private Sprite sprite;
 
     private float width;
     private float height;
@@ -34,6 +41,8 @@ public class Paddle extends GameObject {
         this.width = width;
         this.height = PADDLE_HEIGHT;
         this.color = Color.WHITE; // DEF
+        this.sprite = new Sprite(texture);
+        this.batch = new SpriteBatch();
     }
 
     public Color getColor() {
@@ -53,8 +62,13 @@ public class Paddle extends GameObject {
 
     @Override
     public void draw(ShapeRenderer shape) {
-        shape.setColor(this.getColor());
-        shape.rect(getX() - getHalfWidth(), getY() - getHalfHeight(), width, height);
+//        shape.setColor(this.getColor());
+//        shape.rect(getX() - getHalfWidth(), getY() - getHalfHeight(), width, height);
+        batch.begin();
+        sprite.setSize(width, height);
+        sprite.setPosition(getX() - getHalfWidth(), getY() - getHalfHeight());
+        sprite.draw(batch);
+        batch.end();
     }
 
 }

@@ -13,7 +13,7 @@ public class DesktopLauncher {
 
 	static final int WIDTH = 1024;
 	static final int HEIGHT = 768;
-	private static final String TITLE = "PONG";
+	private static final String TITLE = "JPong v0.0.0";
 
 	private static Lwjgl3ApplicationConfiguration config;
 

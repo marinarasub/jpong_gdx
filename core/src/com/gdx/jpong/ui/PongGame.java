@@ -5,6 +5,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Preferences;
 import com.badlogic.gdx.graphics.Texture;
 import com.gdx.jpong.model.SongMap;
+import com.gdx.jpong.ui.screen.EditorScreen;
 import com.gdx.jpong.ui.screen.PlayScreen;
 import com.gdx.jpong.ui.screen.MainMenuScreen;
 import com.gdx.jpong.ui.screen.SongSelectScreen;
@@ -14,17 +15,20 @@ public class PongGame extends Game {
 	private Preferences prefs;
 	private PlayScreen game;
 
+	private MainMenuScreen menu;
+
 	@Override
 	public void create() {
 		prefs = Gdx.app.getPreferences("config.xml");
 		Gdx.graphics.setResizable(true);
 		loadSettings();
+		menu = new MainMenuScreen(this);
 		menu();
 	}
 
 
 	public void menu() {
-		setScreen(new MainMenuScreen(this));
+		setScreen(menu);
 	}
 
 	public void play() {
@@ -38,6 +42,10 @@ public class PongGame extends Game {
 
 	public void songSelect() {
 		setScreen(new SongSelectScreen(this));
+	}
+
+	public void editor() {
+		setScreen(new EditorScreen(this));
 	}
 
 	@Override
@@ -58,6 +66,7 @@ public class PongGame extends Game {
 		}
 		Gdx.graphics.setForegroundFPS(fps);
 		Gdx.graphics.setVSync(vSync);
+		Gdx.graphics.setResizable(false);
 	}
 
 	private void saveSettings() {

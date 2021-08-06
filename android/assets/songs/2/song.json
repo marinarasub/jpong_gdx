@@ -1,0 +1,23 @@
+{
+  "version": 0.0,
+  "metadata":
+  {
+    "id": 1,
+    "title": "SAVE (Encore)",
+    "artist": "DM DOKURO",
+    "author": "marinarasub",
+    "bpm": 180,
+    "startOffset": 0.476
+  },
+  "files":
+  {
+    "audio": "DM DOKURO - SAVE (Encore).mp3",
+    "background": "70858371_p0_master1200.jpg"
+  },
+  "objects":
+  [
+    {
+      "time": 0, "spawnX": 0.5, "spawnY": 0, "radius": 15, "velX": 0, "velY": 100, "accX": 0, "accY": 0
+    }
+  ]
+}

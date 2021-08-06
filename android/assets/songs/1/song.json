@@ -1,0 +1,23 @@
+{
+  "version": 0.0,
+  "metadata":
+  {
+    "id": 1,
+    "title": "quaver",
+    "artist": "dj TAKA",
+    "author": "marinarasub",
+    "bpm": 186,
+    "startOffset": 1.198
+  },
+  "files":
+  {
+    "audio": "dj TAKA - quaver.mp3",
+    "background": "89136015_p0.jpg"
+  },
+  "objects":
+  [
+    {
+      "time": 0, "spawnX": 0.5, "spawnY": 0, "radius": 15, "velX": 0, "velY": 100, "accX": 0, "accY": 0
+    }
+  ]
+}
