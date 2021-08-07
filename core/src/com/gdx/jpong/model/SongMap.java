@@ -140,12 +140,19 @@ public class SongMap {
             } else return;
         }
         if (!spawns.isEmpty()) {
-            Float time = spawns.firstKey();
-            if (getTime() >= time + startOffset) {
+            if (isOvertime()) {
                 waitingSpawn = true;
                 music.pause();
             }
         }
+    }
+
+    public boolean isOvertime() {
+        if (!spawns.isEmpty()) {
+            Float time = spawns.firstKey();
+            return getTime() >= time + startOffset;
+        }
+        return false;
     }
 
     public float getTime() {
