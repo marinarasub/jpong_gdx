@@ -157,6 +157,7 @@ public class SongSelectScreen extends GameScreen implements Screen, InputProcess
                 super.touchUp(e, x, y, point, button);
                 Gdx.app.log("BUTTON", "Start clicked");
                 Gdx.app.log("SELECT", "Select" + songSelect.getActor());
+                dispose();
                 game.play(mapFromCurrent()); // TODO
             }
         });
@@ -204,6 +205,7 @@ public class SongSelectScreen extends GameScreen implements Screen, InputProcess
             public void touchUp (InputEvent e, float x, float y, int point, int button) {
                 super.touchUp(e, x, y, point, button);
                 Gdx.app.log("BUTTON", "Back clicked");
+                dispose();
                 game.menu();
             }
         });
@@ -302,7 +304,8 @@ public class SongSelectScreen extends GameScreen implements Screen, InputProcess
 
     @Override
     public void dispose() {
-
+        currentSong.dispose();
+        stage.dispose();
     }
 
     /* INPUT */

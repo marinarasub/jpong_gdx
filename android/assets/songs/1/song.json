@@ -22,6 +22,41 @@
     { "time": 1.290, "spawnX": 0.571, "spawnY": 1, "radius": 15, "velX": 0, "velY": -300, "accX": 0, "accY": 0 },
     { "time": 1.613, "spawnX": 0.714, "spawnY": 1, "radius": 15, "velX": 0, "velY": -300, "accX": 0, "accY": 0 },
     { "time": 1.935, "spawnX": 0.857, "spawnY": 1, "radius": 15, "velX": 0, "velY": -300, "accX": 0, "accY": 0 },
-    { "time": 2.258, "spawnX": 1.000, "spawnY": 1, "radius": 15, "velX": 0, "velY": -300, "accX": 0, "accY": 0 }
+    { "time": 2.258, "spawnX": 1.000, "spawnY": 1, "radius": 15, "velX": 0, "velY": -300, "accX": 0, "accY": 0 },
+
+    { "time": 11.935, "spawnX": 0.000, "spawnY": 0, "radius": 15, "velX": 0, "velY": 300, "accX": 0, "accY": 0 },
+    { "time": 12.097, "spawnX": 0.063, "spawnY": 0, "radius": 15, "velX": 0, "velY": -300, "accX": 0, "accY": 0 },
+    { "time": 12.258, "spawnX": 0.125, "spawnY": 0, "radius": 15, "velX": 0, "velY": 300, "accX": 0, "accY": 0 },
+    { "time": 12.419, "spawnX": 0.188, "spawnY": 0, "radius": 15, "velX": 0, "velY": -300, "accX": 0, "accY": 0 },
+    { "time": 12.581, "spawnX": 0.250, "spawnY": 0, "radius": 15, "velX": 0, "velY": 300, "accX": 0, "accY": 0 },
+    { "time": 12.742, "spawnX": 0.313, "spawnY": 0, "radius": 15, "velX": 0, "velY": -300, "accX": 0, "accY": 0 },
+    { "time": 12.903, "spawnX": 0.375, "spawnY": 0, "radius": 15, "velX": 0, "velY": 300, "accX": 0, "accY": 0 },
+    { "time": 13.065, "spawnX": 0.438, "spawnY": 0, "radius": 15, "velX": 0, "velY": -300, "accX": 0, "accY": 0 },
+    { "time": 13.226, "spawnX": 0.500, "spawnY": 0, "radius": 15, "velX": 0, "velY": 300, "accX": 0, "accY": 0 },
+    { "time": 13.387, "spawnX": 0.563, "spawnY": 0, "radius": 15, "velX": 0, "velY": -300, "accX": 0, "accY": 0 },
+    { "time": 13.548, "spawnX": 0.625, "spawnY": 0, "radius": 15, "velX": 0, "velY": 300, "accX": 0, "accY": 0 },
+    { "time": 13.710, "spawnX": 0.688, "spawnY": 0, "radius": 15, "velX": 0, "velY": -300, "accX": 0, "accY": 0 },
+    { "time": 13.871, "spawnX": 0.750, "spawnY": 0, "radius": 15, "velX": 0, "velY": 300, "accX": 0, "accY": 0 },
+    { "time": 14.032, "spawnX": 0.813, "spawnY": 0, "radius": 15, "velX": 0, "velY": -300, "accX": 0, "accY": 0 },
+    { "time": 14.194, "spawnX": 0.875, "spawnY": 0, "radius": 15, "velX": 0, "velY": 300, "accX": 0, "accY": 0 },
+    { "time": 14.355, "spawnX": 0.938, "spawnY": 0, "radius": 15, "velX": 0, "velY": -300, "accX": 0, "accY": 0 },
+
+    { "time": 14.516, "spawnX": 0.000, "spawnY": 0, "radius": 15, "velX": 0, "velY": 300, "accX": 0, "accY": 0 },
+    { "time": 14.677, "spawnX": 0.063, "spawnY": 0, "radius": 15, "velX": 0, "velY": -300, "accX": 0, "accY": 0 },
+    { "time": 14.839, "spawnX": 0.125, "spawnY": 0, "radius": 15, "velX": 0, "velY": 300, "accX": 0, "accY": 0 },
+    { "time": 15.000, "spawnX": 0.188, "spawnY": 0, "radius": 15, "velX": 0, "velY": -300, "accX": 0, "accY": 0 },
+    { "time": 15.161, "spawnX": 0.250, "spawnY": 0, "radius": 15, "velX": 0, "velY": 300, "accX": 0, "accY": 0 },
+    { "time": 15.323, "spawnX": 0.313, "spawnY": 0, "radius": 15, "velX": 0, "velY": -300, "accX": 0, "accY": 0 },
+    { "time": 15.484, "spawnX": 0.375, "spawnY": 0, "radius": 15, "velX": 0, "velY": 300, "accX": 0, "accY": 0 },
+    { "time": 15.645, "spawnX": 0.438, "spawnY": 0, "radius": 15, "velX": 0, "velY": -300, "accX": 0, "accY": 0 },
+    { "time": 15.806, "spawnX": 0.500, "spawnY": 0, "radius": 15, "velX": 0, "velY": 300, "accX": 0, "accY": 0 },
+    { "time": 15.968, "spawnX": 0.563, "spawnY": 0, "radius": 15, "velX": 0, "velY": -300, "accX": 0, "accY": 0 },
+    { "time": 16.129, "spawnX": 0.625, "spawnY": 0, "radius": 15, "velX": 0, "velY": 300, "accX": 0, "accY": 0 },
+    { "time": 16.290, "spawnX": 0.688, "spawnY": 0, "radius": 15, "velX": 0, "velY": -300, "accX": 0, "accY": 0 },
+    { "time": 16.452, "spawnX": 0.750, "spawnY": 0, "radius": 15, "velX": 0, "velY": 300, "accX": 0, "accY": 0 },
+    { "time": 16.613, "spawnX": 0.813, "spawnY": 0, "radius": 15, "velX": 0, "velY": -300, "accX": 0, "accY": 0 },
+    { "time": 16.774, "spawnX": 0.875, "spawnY": 0, "radius": 15, "velX": 0, "velY": 300, "accX": 0, "accY": 0 },
+    { "time": 16.935, "spawnX": 0.938, "spawnY": 0, "radius": 15, "velX": 0, "velY": -300, "accX": 0, "accY": 0 }
+
   ]
 }
