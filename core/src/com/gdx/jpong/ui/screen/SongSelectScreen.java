@@ -4,6 +4,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.Screen;
+import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.scenes.scene2d.Actor;
@@ -12,10 +13,14 @@ import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
-import com.badlogic.gdx.utils.Array;
-import com.badlogic.gdx.utils.JsonReader;
-import com.badlogic.gdx.utils.JsonValue;
+import com.badlogic.gdx.utils.*;
+import com.gdx.jpong.model.Ball;
+import com.gdx.jpong.model.SongMap;
 import com.gdx.jpong.ui.PongGame;
+
+import java.util.LinkedList;
+import java.util.Random;
+import java.util.TreeMap;
 
 
 public class SongSelectScreen extends GameScreen implements Screen, InputProcessor {
@@ -34,14 +39,20 @@ public class SongSelectScreen extends GameScreen implements Screen, InputProcess
     private final Stage stage;
     private final InputMultiplexer multiInput;
 
+    // CURRENT SONG
     private String currentTitle = "Select a song";
     private String currentArtist = "";
     private float currentBPM;
+    private Music currentSong;
     // image music.png by https://creativemarket.com/Becris
-    private final Image defaultImage = new Image(new Texture(Gdx.files.internal("images/music.png")));
-    private Image currentImage = defaultImage;
+    private final Texture defaultImage = new Texture(Gdx.files.internal("images/music.png"));
+    private Texture currentImage = defaultImage;
 
-    // TODO load map based on json file
+    // SLIDERS
+    private Slider diffSlider;
+    private Slider sizeSlider;
+    private Slider velSlider;
+    private Slider dimSlider;
 
     public SongSelectScreen(PongGame game) {
         super(game);
@@ -49,7 +60,7 @@ public class SongSelectScreen extends GameScreen implements Screen, InputProcess
         songs = new Array<>();
         getHandles(Gdx.files.internal("songs/"), songs);
         if (!songs.isEmpty())
-            current = songs.get(0);
+            current = getRandomFile();
 
         stage = new Stage();
         songInfo = new Table();
@@ -64,8 +75,19 @@ public class SongSelectScreen extends GameScreen implements Screen, InputProcess
         multiInput = new InputMultiplexer(stage, this);
     }
 
+    private FileHandle getRandomFile() {
+        Random r = new Random();
+        return songs.get(r.nextInt(songs.size));
+    }
+
+    // Rebuild content with current song
     private void reloadContent() {
-        gatherSongInfo();
+        try {
+            gatherSongInfo();
+        } catch (Exception e) {
+            Gdx.app.error("FILE", "error reading song folder");
+            current = getRandomFile();
+        }
         table.clear();
         songInfo.clear();
         buildSongPanel();
@@ -73,22 +95,33 @@ public class SongSelectScreen extends GameScreen implements Screen, InputProcess
         startButton();
         menuButton();
         buildTable();
+        if (currentSong != null)
+            currentSong.play();
+        songList.setSelected(current);
     }
 
-    private void gatherSongInfo() {
+    private void gatherSongInfo() throws GdxRuntimeException {
         if (current != null) {
             JsonValue json = reader.parse(current);
             JsonValue meta = json.get("metadata");
             currentTitle = meta.getString("title");
             currentArtist = meta.getString("artist");
-            currentBPM = meta.getFloat("bpm");
+            JsonValue time = json.get("timing");
+            currentBPM = time.getFloat("bpm");
             JsonValue files = json.get("files");
             FileHandle image = current.sibling(files.getString("background"));
             if (image.exists() && !image.isDirectory()) {
                 Gdx.app.log("IMAGE", image.path());
-                currentImage = new Image(new Texture(Gdx.files.internal(image.path())));
+                currentImage = new Texture(Gdx.files.internal(image.path()));
+                currentImage.setAnisotropicFilter(16);
             } else {
                 currentImage = defaultImage;
+            }
+            FileHandle song = current.sibling(files.getString("audio"));
+            if (song.exists() && !song.isDirectory()) {
+                Gdx.app.log("SONG", song.path());
+                if (currentSong != null) currentSong.dispose();
+                currentSong = Gdx.audio.newMusic(song);
             }
         }
     }
@@ -124,10 +157,44 @@ public class SongSelectScreen extends GameScreen implements Screen, InputProcess
                 super.touchUp(e, x, y, point, button);
                 Gdx.app.log("BUTTON", "Start clicked");
                 Gdx.app.log("SELECT", "Select" + songSelect.getActor());
-                game.play();
+                game.play(mapFromCurrent()); // TODO
             }
         });
         play.pad(10);
+    }
+
+    private SongMap mapFromCurrent() {
+        JsonValue json = reader.parse(current);
+
+        TreeMap<Float, java.util.List<Ball>> balls = new TreeMap<>();
+        JsonValue spawns = json.get("objects");
+        for (JsonValue b : spawns) {
+            Float time = b.getFloat("time");
+            float x = b.getFloat("spawnX");
+            float y = b.getFloat("spawnY");
+            float radius = b.getFloat("radius");
+            float velX = b.getFloat("velX");
+            float velY = b.getFloat("velY");
+            float accX = b.getFloat("accX");
+            float accY= b.getFloat("accY");
+            Ball ball = new Ball(x, y, radius, velX, velY, accX, accY);
+            java.util.List<Ball> timeList = balls.get(time);
+            if (timeList == null) {
+                java.util.List<Ball> list = new LinkedList<>();
+                list.add(ball);
+                balls.put(time, list);
+            }
+            else {
+                timeList.add(ball);
+            }
+        }
+        float offset = json.get("timing").getFloat("startOffset");
+        float dim = dimSlider.getVisualValue() / 100;
+        float size = sizeSlider.getVisualValue() / 100;
+        float vel = velSlider.getVisualValue() / 100;
+        Gdx.app.log("velslider", String.valueOf(vel));
+        float diff = diffSlider.getVisualValue();
+        return new SongMap(balls, currentSong, currentImage, game.getSize(), offset, dim, size, vel, diff);
     }
 
     private void menuButton() {
@@ -143,17 +210,39 @@ public class SongSelectScreen extends GameScreen implements Screen, InputProcess
         menu.pad(10);
     }
 
-
-
     private void buildSongPanel() {
-        Image songImage = currentImage;
-        songInfo.add(songImage).height(200).width(200).pad(10).left();
+        int width = 200;
+        int height = 200;
+        Image songImage = new Image(currentImage);
+        songInfo.add(songImage).width(width).height(height).pad(10).left();
+
         VerticalGroup info = buildSongInfo();
         songInfo.add(info).row();
+        addSliders();
+    }
+
+    private void addSliders() {
+        float half = 0.5f;
+        // song map will calculate.
         songInfo.add(new Label("AI Difficulty", skin)).pad(10);
-        songInfo.add(new Slider(1, 10, 1, false, skin)).pad(10).row();
+        diffSlider = new Slider(0, 10, 1, false, skin);
+        diffSlider.setVisualPercent(half);
+        songInfo.add(diffSlider).row();
+        // radius multiplier 50 - 150 %
         songInfo.add(new Label("Ball Size", skin)).pad(10);
-        songInfo.add(new Slider(5, 30, 1, false, skin)).pad(10).row();
+        sizeSlider = new Slider(50, 150, 10, false, skin);
+        sizeSlider.setVisualPercent(half);
+        songInfo.add(sizeSlider).row();
+        // velocity multiplier 50 - 150%
+        songInfo.add(new Label("Velocity Multiplier", skin)).pad(10);
+        velSlider = new Slider(50, 150, 5, false, skin);
+        velSlider.setVisualPercent(half);
+        songInfo.add(velSlider).row();
+        // 0 - 100%
+        songInfo.add(new Label("Background Dim", skin)).pad(10);
+        dimSlider = new Slider(0, 100, 1, false, skin);
+        dimSlider.setVisualPercent(half);
+        songInfo.add(dimSlider).row();
     }
 
     private VerticalGroup buildSongInfo() {
@@ -277,14 +366,11 @@ public class SongSelectScreen extends GameScreen implements Screen, InputProcess
         @Override
         public void touchUp(InputEvent e, float x, float y, int point, int button) {
             super.touchUp(e, x, y, point, button);
-            FileHandle target = songList.getItemAt(y);
-            Gdx.app.log("SELECT", target != null ? target.toString() : "none");
-            if (target != null) {
-                current = target;
-                reloadContent();
-                songSelect.setScrollY(y);
-                songList.setSelected(current);
-            }
+            FileHandle target = songList.getSelected();
+            Gdx.app.log("SELECT", target.toString());
+            current = target;
+            reloadContent();
+            songSelect.setScrollY(y);
         }
     }
 

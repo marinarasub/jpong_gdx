@@ -1,31 +1,35 @@
 package com.gdx.jpong.ui.screen;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Screen;
-import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
-import com.badlogic.gdx.utils.Align;
 import com.gdx.jpong.model.SongMap;
 import com.gdx.jpong.model.entity.PongAI;
+import com.gdx.jpong.model.entity.PongEntity;
 import com.gdx.jpong.model.entity.PongPlayer;
 import com.gdx.jpong.ui.PongGame;
 
-public class SongEndScreen extends GameScreen implements Screen {
+public class SongEndScreen extends GameScreen {
 
     //private SpriteBatch batch;
     private Table buttonTable;
     private TextButton replayButton, menuButton;
+
+    private SongMap song;
+    private PongEntity player, ai;
 
     private Stage stage;
     /* CONTROL */
 
     public SongEndScreen(final PongGame game, SongMap song, PongPlayer player, PongAI ai) {
         super(game);
+        this.song = song;
+        this.player = player;
+        this.ai = ai;
         stage = new Stage();
         buttonTable = new Table();
         buttonTable.pad(20.f);
@@ -48,7 +52,7 @@ public class SongEndScreen extends GameScreen implements Screen {
             public void touchUp(InputEvent e, float x, float y, int point, int button) {
                 super.touchUp(e, x, y, point, button);
                 dispose();
-                game.play();
+                game.play(song);
             }
         });
     }
@@ -102,5 +106,6 @@ public class SongEndScreen extends GameScreen implements Screen {
     @Override
     public void dispose() {
         stage.dispose();
+        song.dispose();
     }
 }

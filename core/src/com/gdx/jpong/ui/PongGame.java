@@ -4,6 +4,7 @@ import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Preferences;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.math.Vector2;
 import com.gdx.jpong.model.SongMap;
 import com.gdx.jpong.ui.screen.EditorScreen;
 import com.gdx.jpong.ui.screen.PlayScreen;
@@ -13,9 +14,8 @@ import com.gdx.jpong.ui.screen.SongSelectScreen;
 public class PongGame extends Game {
 
 	private Preferences prefs;
-	private PlayScreen game;
-
 	private MainMenuScreen menu;
+	private PlayScreen play;
 
 	@Override
 	public void create() {
@@ -31,13 +31,9 @@ public class PongGame extends Game {
 		setScreen(menu);
 	}
 
-	public void play() {
-		SongMap songMap = new SongMap("dj TAKA - quaver.mp3");
-		songMap.setBackground(new Texture("images/89136015_p0.jpg"));
-		songMap.setBpm(186.f);
-		songMap.setStartOffset(1.198f);
-		game = new PlayScreen(this, songMap);
-		setScreen(game);
+	public void play(SongMap songMap) {
+		play = new PlayScreen(this, songMap);
+		setScreen(play);
 	}
 
 	public void songSelect() {
@@ -45,7 +41,23 @@ public class PongGame extends Game {
 	}
 
 	public void editor() {
-		setScreen(new EditorScreen(this));
+		//setScreen(new EditorScreen(this)); TODO
+	}
+
+	public void options() {
+		// TODO
+	}
+
+	public Vector2 getSize() {
+		return new Vector2(getWidth(), getHeight());
+	}
+
+	public int getWidth() {
+		return Gdx.graphics.getWidth();
+	}
+
+	public int getHeight() {
+		return Gdx.graphics.getHeight();
 	}
 
 	@Override

@@ -55,8 +55,12 @@ public abstract class GameObject {
         this.velocity.y = velY;
     }
 
-    public void translate(float x, float y) {
-        this.position.add(x, y);
+    public void setAccX(float accX) {
+        this.acceleration.x = accX;
+    }
+
+    public void setAccY(float accY) {
+        this.acceleration.y = accY;
     }
 
     public float getVelX() {
@@ -67,12 +71,24 @@ public abstract class GameObject {
         return velocity.y;
     }
 
+    public float getAccX() {
+        return acceleration.x;
+    }
+
+    public float getAccY() {
+        return acceleration.y;
+    }
+
     public void reflectVelX() {
         velocity.x = -velocity.x;
     }
 
     public void reflectVelY() {
         velocity.y = -velocity.y;
+    }
+
+    public void translate(float x, float y) {
+        this.position.add(x, y);
     }
 
     public float scaleVelX(float deltaTime) {

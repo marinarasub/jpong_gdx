@@ -5,7 +5,6 @@ import com.badlogic.gdx.Input;
 import com.badlogic.gdx.InputAdapter;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.Sprite;
@@ -30,9 +29,6 @@ import java.util.Random;
  */
 public class PlayScreen extends GameScreen implements Screen {
 
-    // CONSTANTS
-    static final int TEST_BALLS = 0; // FOR AI SORT TEST
-
     // NUMBERS
     private float height;  // LOGICAL HEIGHT
     private float width;
@@ -54,6 +50,7 @@ public class PlayScreen extends GameScreen implements Screen {
     // UI
     private BitmapFont scoreLabel;
     private Sprite background;
+    private float dim;
 
     // INPUT
     //private Stage stage;
@@ -72,15 +69,9 @@ public class PlayScreen extends GameScreen implements Screen {
         //stage = new Stage();
 
         balls = new LinkedList<>();
-        players();
-
-        for (int i = 0; i < TEST_BALLS; i++) {
-            //balls.add(new Ball(300, 300, 10, 0, 0));
-            balls.add(randomBall());
-        }
-
         song(song);
         background();
+        players();
         scoreLabel();
     }
 
@@ -88,7 +79,10 @@ public class PlayScreen extends GameScreen implements Screen {
         float buffer = 50.f;
         player = new PongPlayer(new Paddle(250.f, buffer));
         player.setPaddleColor(Color.GREEN);
-        ai = new PongAI(new Paddle(200.f, getHeight() - buffer));
+        ai = new PongAI(
+                new Paddle(200.f, game.getHeight() - buffer),
+                songMap.getDifficulty() * 1000,
+                1.5f - songMap.getDifficulty() / 10);
         ai.setPaddleColor(Color.RED);
     }
 
@@ -98,18 +92,17 @@ public class PlayScreen extends GameScreen implements Screen {
             backgroundTex.setAnisotropicFilter(16.f);
             background = new Sprite(backgroundTex);
             background.setAlpha(1 - songMap.getBackgroundDim()); // assume <= 1
-            background.setPosition(0, 0);
             background.setOrigin(0,0);
 
-            float heightRatio = getHeight() / background.getHeight();
-            float widthRatio = getWidth() / background.getWidth();
+            float heightRatio = game.getHeight() / background.getHeight();
+            float widthRatio = game.getWidth() / background.getWidth();
 
             if (heightRatio > widthRatio) {
-                background.setScale(getHeight() / background.getHeight());
-                background.setPosition((getWidth() - background.getWidth()) / 2, 0);
+                background.setScale(heightRatio);
+                background.setPosition((game.getWidth() - background.getWidth()) / 2, 0);
             } else {
-                background.setScale(getWidth() / background.getWidth());
-                background.setPosition(0,(getHeight() - background.getHeight()) / 2);
+                background.setScale(widthRatio);
+                background.setPosition(0,(game.getHeight() - background.getHeight()) / 2);
             }
         }
     }
@@ -124,7 +117,6 @@ public class PlayScreen extends GameScreen implements Screen {
 
     private void song(SongMap song) {
         songMap = song;
-        songMap.setBackgroundDim(0.75f); // TODO setting config
         songMap.start();
         songMap.setOnCompletionListener(music -> {
             //game.menu();
@@ -135,14 +127,6 @@ public class PlayScreen extends GameScreen implements Screen {
 
 
     /* MUTATION & ACCESSORS */
-
-    public int getHeight() {
-        return Gdx.graphics.getHeight();
-    }
-
-    public int getWidth() {
-        return Gdx.graphics.getWidth();
-    }
 
     private float getFixedTime() {
         return (float) 1 / fixedUPS;
@@ -189,7 +173,7 @@ public class PlayScreen extends GameScreen implements Screen {
                         + "\n" + songMap.getClockTime(),
                         //+ "\n" + songMap.getClockTime(),
                 20,
-                getHeight() - 20);
+                game.getHeight() - 20);
         batch.end();
     }
 
@@ -205,10 +189,11 @@ public class PlayScreen extends GameScreen implements Screen {
 
     private void handleTime(float deltaTime) {
         songMap.update(deltaTime);
-        if (songMap.isWaitingSpawn()) { // TODO
-            songMap.acknowledgeSpawn();
-            //if (balls.size() == 0)
-            balls.add(randomBall());
+        if (songMap.isWaitingSpawn()) {
+            Float time  = songMap.getSpawnTime();
+            List<Ball> list = songMap.getSpawns(time);
+            balls.addAll(list);
+            songMap.removeAlreadySpawned(time);
         }
     }
 
@@ -233,9 +218,8 @@ public class PlayScreen extends GameScreen implements Screen {
         Iterator<Ball> i = balls.listIterator();
         while (i.hasNext()) {
             Ball b = i.next();
-            float yOut = b.isOutOfYBounds();
-            if (yOut != 0) {
-                if (yOut >= getHeight()) {
+            if (b.isOutOfYBounds(0-b.getRadius(), game.getHeight()+b.getRadius())) {
+                if (b.getY() >= game.getHeight()) {
                     handleScore(player, b);
                 } else {
                     handleScore(ai, b);
@@ -266,23 +250,23 @@ public class PlayScreen extends GameScreen implements Screen {
 
     }
 
-    private Ball randomBall() {
-        Random r = new Random();
-        float velMultiplier = 100.f;
-        return new Ball(
-                (songMap.getTime() * 50) % getWidth(),
-                (int) songMap.getTime() % 2 == 1 ?
-                        0 + player.getPaddle().getHeight()
-                        : getHeight() - 0 - ai.getPaddle().getHeight(), // TODO set const
-                // for 50
-                16.f, // TODO const ball radius
-                10 * (r.nextFloat() - 0.5f),
-                (int) songMap.getTime() % 2 == 1 ?
-                        velMultiplier * (r.nextFloat()) + 150.f
-                        : velMultiplier * (-r.nextFloat()) - 150.f,
-                50.f * (r.nextFloat() - 0.5f),
-                0);
-    }
+//    private Ball randomBall() {
+//        Random r = new Random();
+//        float velMultiplier = 100.f;
+//        return new Ball(
+//                (songMap.getTime() * 50) % game.getWidth(),
+//                (int) songMap.getTime() % 2 == 1 ?
+//                        0 + player.getPaddle().getHeight()
+//                        : game.getHeight() - 0 - ai.getPaddle().getHeight(), // TODO set const
+//                // for 50
+//                16.f, // TODO const ball radius
+//                10 * (r.nextFloat() - 0.5f),
+//                (int) songMap.getTime() % 2 == 1 ?
+//                        velMultiplier * (r.nextFloat()) + 150.f
+//                        : velMultiplier * (-r.nextFloat()) - 150.f,
+//                50.f * (r.nextFloat() - 0.5f),
+//                0);
+//    }
 
 
     /* CONTROL METHODS */
@@ -333,9 +317,8 @@ public class PlayScreen extends GameScreen implements Screen {
     @Override
     public void dispose() {
         // TODO free
-        songMap.dispose();
         scoreLabel.dispose();
         batch.dispose();
-        //shape.dispose();
+        //shape.dispose(); TODO
     }
 }

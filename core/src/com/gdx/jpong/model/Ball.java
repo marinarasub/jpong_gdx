@@ -57,6 +57,10 @@ public class Ball extends GameObject {
         return immune;
     }
 
+    public void setRadius(float r) {
+        this.radius = r;
+    }
+
     public float getRadius() {
         return radius;
     }
@@ -84,11 +88,8 @@ public class Ball extends GameObject {
     }
 
     // return last y pos, 0 if not
-    public float isOutOfYBounds() {
-        if (getY() + radius < 0 || getY() - radius > Gdx.graphics.getHeight()) {
-            return getY();
-        }
-        return 0;
+    public boolean isOutOfYBounds(float lower, float upper) {
+        return getY() + radius < lower || getY() - radius > upper;
     }
 
     private boolean isYCollision(Paddle paddle, float lenience) {
@@ -266,9 +267,9 @@ public class Ball extends GameObject {
     /**
      * REQUIRES: y velocity is not 0
      * Compare two balls using their velocity and current position relative to a y position
-     * @param y
-     * @param ball1
-     * @param ball2
+     * @param y y value to compare distance to
+     * @param ball1 first ball
+     * @param ball2 second ball
      * @return true if ball1 will reach pos (~, y) sooner
      */
     public static boolean compareCloserVelY(float y, Ball ball1, Ball ball2) {

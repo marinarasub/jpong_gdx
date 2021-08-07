@@ -1,23 +1,27 @@
 {
   "version": 0.0,
-  "metadata":
-  {
+  "metadata": {
     "id": 1,
     "title": "quaver",
     "artist": "dj TAKA",
-    "author": "marinarasub",
-    "bpm": 186,
-    "startOffset": 1.198
+    "author": "marinarasub"
   },
-  "files":
-  {
+  "files": {
     "audio": "dj TAKA - quaver.mp3",
     "background": "89136015_p0.jpg"
   },
-  "objects":
-  [
-    {
-      "time": 0, "spawnX": 0.5, "spawnY": 0, "radius": 15, "velX": 0, "velY": 100, "accX": 0, "accY": 0
-    }
+  "timing": {
+    "bpm": 186,
+    "startOffset": 1.198
+  },
+  "objects": [
+    { "time": 0.000, "spawnX": 0.000, "spawnY": 0, "radius": 15, "velX": 0, "velY": 300, "accX": 0, "accY": 0 },
+    { "time": 0.323, "spawnX": 0.143, "spawnY": 0, "radius": 15, "velX": 0, "velY": 300, "accX": 0, "accY": 0 },
+    { "time": 0.645, "spawnX": 0.286, "spawnY": 0, "radius": 15, "velX": 0, "velY": 300, "accX": 0, "accY": 0 },
+    { "time": 0.969, "spawnX": 0.429, "spawnY": 0, "radius": 15, "velX": 0, "velY": 300, "accX": 0, "accY": 0 },
+    { "time": 1.290, "spawnX": 0.571, "spawnY": 1, "radius": 15, "velX": 0, "velY": -300, "accX": 0, "accY": 0 },
+    { "time": 1.613, "spawnX": 0.714, "spawnY": 1, "radius": 15, "velX": 0, "velY": -300, "accX": 0, "accY": 0 },
+    { "time": 1.935, "spawnX": 0.857, "spawnY": 1, "radius": 15, "velX": 0, "velY": -300, "accX": 0, "accY": 0 },
+    { "time": 2.258, "spawnX": 1.000, "spawnY": 1, "radius": 15, "velX": 0, "velY": -300, "accX": 0, "accY": 0 }
   ]
 }

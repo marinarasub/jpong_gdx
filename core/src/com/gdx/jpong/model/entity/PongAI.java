@@ -8,18 +8,18 @@ import java.util.List;
 
 public class PongAI extends PongEntity {
 
-    private float maxSpeed; // how fast this boi move side 2 side like a boss
+    private float maxSpeed = 5000.f; // how fast this boi move side 2 side like a boss
     private float maxError; // +- exact x position
     private int updatePrecison; // how many updates/step to check REQUIRES > 0
-    private float reaction;
+    private float reaction = 1.f;
 
     Ball target;
 
-    public PongAI(final Paddle paddle) {
+    public PongAI(final Paddle paddle, float maxSpeed, float reaction) {
         super(paddle);
-        this.maxSpeed = 5000.f;
+        this.maxSpeed = maxSpeed; // default 5000
         this.maxError = paddle.getHalfWidth();
-        this.reaction = 1.1f;
+        this.reaction = reaction; // default 1;
         this.updatePrecison = 60;
     }
 

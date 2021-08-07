@@ -1,23 +1,20 @@
 {
   "version": 0.0,
-  "metadata":
-  {
-    "id": 1,
+  "metadata": {
+    "id": 3,
     "title": "Chaoz Fantasy",
     "artist": "ParagonX9",
-    "author": "marinarasub",
-    "bpm": 162.35,
-    "startOffset": 0.958
+    "author": "marinarasub"
   },
-  "files":
-  {
+  "files": {
     "audio": "ParagonX9 - Chaoz Fantasy.mp3",
     "background": ""
   },
-  "objects":
-  [
-    {
-      "time": 0, "spawnX": 0.5, "spawnY": 0, "radius": 15, "velX": 0, "velY": 100, "accX": 0, "accY": 0
-    }
+  "timing": {
+    "bpm": 162.35,
+    "startOffset": 0.958
+  },
+  "objects": [
+    { "time": 0, "spawnX": 0.5, "spawnY": 0, "radius": 15, "velX": 0, "velY": 100, "accX": 0, "accY": 0 }
   ]
 }
