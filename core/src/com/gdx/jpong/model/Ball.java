@@ -3,6 +3,9 @@ package com.gdx.jpong.model;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.Sprite;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Vector2;
 
@@ -10,10 +13,14 @@ import java.util.*;
 
 public class Ball extends GameObject {
 
-    private Sound hitSound;
+    static final String SOUND = "sounds/soft-hitclap.wav";
+    static final Sound hitSound = Gdx.audio.newSound(Gdx.files.internal(SOUND));
+    static final Texture texture = new Texture(Gdx.files.internal("textures/ball.png"));
 
+    private SpriteBatch batch;
+    private Sprite sprite;
     private float radius;
-    private boolean immune; // ignore collision to paddles
+    private boolean immune = true; // ignore collision to paddles
 
     private Color color;
 
@@ -21,8 +28,18 @@ public class Ball extends GameObject {
         super(x, y, velX, velY);
         this.radius = radius;
         this.color = Color.LIGHT_GRAY;
-        hitSound = Gdx.audio.newSound(Gdx.files.internal("audio/sounds/soft-hitclap.wav"));
-        immune = true;
+        this.batch = new SpriteBatch();
+        this.sprite = new Sprite(texture);
+        sprite.setSize(radius * 2, radius * 2);
+    }
+
+    public Ball(float x, float y, float radius, float velX, float velY, float accX, float accY) {
+        super(x, y, velX, velY, accX, accY);
+        this.radius = radius;
+        this.color = Color.LIGHT_GRAY;
+        this.batch = new SpriteBatch();
+        this.sprite = new Sprite(texture);
+        sprite.setSize(radius * 2, radius * 2);
     }
 
     // copy object
@@ -30,12 +47,18 @@ public class Ball extends GameObject {
         super(b.getX(), b.getY(), b.getVelX(), b.getVelY());
         this.radius = b.getRadius();
         this.color = b.getColor();
-        this.hitSound = b.hitSound;
+        //this.hitSound = b.hitSound;
+        this.batch = b.batch;
+        this.sprite = b.sprite;
         this.immune = b.isImmune();
     }
 
     public boolean isImmune() {
         return immune;
+    }
+
+    public void setRadius(float r) {
+        this.radius = r;
     }
 
     public float getRadius() {
@@ -44,6 +67,10 @@ public class Ball extends GameObject {
 
     public Color getColor() {
         return color;
+    }
+
+    public void setColor(Color color) {
+        this.color = color;
     }
 
     //@Override
@@ -61,31 +88,9 @@ public class Ball extends GameObject {
     }
 
     // return last y pos, 0 if not
-    public float isOutOfYBounds() {
-        if (getY() + radius < 0 || getY() - radius > Gdx.graphics.getHeight()) {
-            return getY();
-        }
-        return 0;
+    public boolean isOutOfYBounds(float lower, float upper) {
+        return getY() + radius < lower || getY() - radius > upper;
     }
-
-    // DEPRECATED: will not push balls, use fixed timestep instead
-//    private boolean handlePaddleCollision(float deltaTime, Paddle paddle) {
-//        float deltaX = this.getX() - paddle.getX();
-//        float deltaY = this.getY() - paddle.getY();
-//        float halfHeight = paddle.getHalfHeight();
-//        float outerX = halfHeight + getRadius();
-//        float lenience = getRadius() / 2;
-//
-//        if (isYCollision(paddle, lenience)) {
-//            if (Math.abs(deltaY) - halfHeight - getRadius() < Math.abs(scaleVelY(deltaTime))) {
-//                //setX();
-//                setY(paddle.getY() + (getVelY() > 0 ? -outerX : outerX));
-//                setVelocity(calculateNewVelocity(paddle, deltaX, getVelY()));
-//                return true;
-//            }
-//        }
-//        return false;
-//    }
 
     private boolean isYCollision(Paddle paddle, float lenience) {
         float halfPaddleWidth = paddle.getHalfWidth();
@@ -97,7 +102,7 @@ public class Ball extends GameObject {
      * @param paddle paddle to check collision with
      * @return true if collision
      */
-    private boolean handlePaddleCollision(float deltaTime, Paddle paddle) {
+    private boolean handlePaddleCollision(float deltaTime, Paddle paddle) { // TODO tidy
         float halfPaddleHeight = paddle.getHalfHeight();
         float halfPaddleWidth = paddle.getHalfWidth();
 
@@ -112,7 +117,7 @@ public class Ball extends GameObject {
             if (isYCollision(paddle, lenience)) {
                 //X VEL BASED ON dX from PADDLE CENTER
                 if (!immune) {
-                    hitSound.play(0.3f);
+                    playHitsound();
                     setVelocity(calculateNewVelocity(paddle, deltaX, getVelY()));
                     if (paddle.getY() < this.getY()) {
                         this.translate(0, intersectY);
@@ -124,7 +129,7 @@ public class Ball extends GameObject {
                 }
             } else { //if (this.y >= paddle.y - halfPaddleHeight && this.y <= paddle.y + halfPaddleHeight) {
                 if (!immune) {
-                    hitSound.play(0.3f);
+                    playHitsound();
                     reflectVelX();
                     // L OR R
                     if (paddle.getX() < this.getX()) {
@@ -137,6 +142,11 @@ public class Ball extends GameObject {
             return true;
         }
         return false;
+    }
+
+    private void playHitsound() {
+        if (hitSound != null)
+            hitSound.play(0.3f);
     }
 
     private void handleImmunity(Paddle paddle) {
@@ -175,13 +185,14 @@ public class Ball extends GameObject {
         float leftX = getX() - getRadius();
         float rightX = getX() + getRadius();
         float addVelX = scaleVelX(deltaTime);
-        if (leftX + addVelX <= 0 || rightX + addVelX >= Gdx.graphics.getWidth()) {
+        int wall = 0;
+        if (leftX + addVelX <= wall || rightX + addVelX >= Gdx.graphics.getWidth() - wall) {
             //hitSound.play(0.3f);
             setVelX(-getVelX());
-            if (leftX + addVelX <= 0) {
-                setX(0 + radius);
+            if (leftX + addVelX <= wall) {
+                setX(wall + radius);
             } else {
-                setX(Gdx.graphics.getWidth() - getRadius());
+                setX(Gdx.graphics.getWidth() - wall - getRadius());
             }
         }
 //        if (y - radius < 0 || y + radius > Gdx.graphics.getHeight()) {
@@ -193,6 +204,11 @@ public class Ball extends GameObject {
     public void draw(ShapeRenderer shape) {
         shape.setColor(getColor());
         shape.circle(getX(), getY(), getRadius());
+//        batch.begin();
+//        sprite.setPosition(getX(), getY());
+//        sprite.setOriginCenter();
+//        sprite.draw(batch);
+//        batch.end();
     }
 
     /**
@@ -205,38 +221,7 @@ public class Ball extends GameObject {
     }
 
 
-    // return new sorted list of balls order by closest euclidian distance to pos x, y
-    public static void sortByClosest(float x, float y, List<Ball> balls) {
-        while (true) {
-            boolean sorted = true;
-            for (int i = 1; i < balls.size()-1; i++) {
-                Ball b1 = balls.get(i-1);
-                Ball b2 = balls.get(i);
-                if (!compareCloserBall(x, y, b1, b2)) {
-                    Collections.swap(balls, i, i-1);
-                    sorted = false;
-                }
-            }
-            if (sorted) break;
-        }
-    }
-
-    public static void sortByClosestY(float y, List<Ball> balls) {
-        while (true) {
-            boolean sorted = true;
-            for (int i = 1; i < balls.size()-1; i++) {
-                Ball b1 = balls.get(i-1);
-                Ball b2 = balls.get(i);
-                if (!compareCloserBall(y, b1, b2)) {
-                    Collections.swap(balls, i, i-1);
-                    sorted = false;
-                }
-            }
-            if (sorted) break;
-        }
-    }
-
-    public static List<Ball> sortByClosestYVelocity(float y, List<Ball> balls) {
+    public static List<Ball> sortByClosestVelY(float y, List<Ball> balls) {
         return mergeSort(y, new LinkedList<>(balls));
     }
 
@@ -256,7 +241,7 @@ public class Ball extends GameObject {
         while (iLeft.hasNext() && iRight.hasNext()) {
             Ball bl = iLeft.next();
             Ball br = iRight.next();
-            if (compareCloserBallYVel(y, bl, br)) {
+            if (compareCloserVelY(y, bl, br)) {
                 merge.add(bl);
                 iLeft.remove();
             } else {
@@ -279,28 +264,15 @@ public class Ball extends GameObject {
         return merge;
     }
 
-    // return true if 1 is closer or equal, pythag.
-    public static boolean compareCloserBall(float x, float y, Ball ball1, Ball ball2) {
-        float ball1dist = ball1.position.len();
-        float ball2dist = ball2.position.len();
-        return ball1dist <= ball2dist;
-    }
-
-    public static boolean compareCloserBall(float y, Ball ball1, Ball ball2) {
-        float ball1dist = Math.abs(ball1.getY() - y);
-        float ball2dist = Math.abs(ball2.getY() - y);
-        return ball1dist <= ball2dist;
-    }
-
     /**
      * REQUIRES: y velocity is not 0
      * Compare two balls using their velocity and current position relative to a y position
-     * @param y
-     * @param ball1
-     * @param ball2
+     * @param y y value to compare distance to
+     * @param ball1 first ball
+     * @param ball2 second ball
      * @return true if ball1 will reach pos (~, y) sooner
      */
-    public static boolean compareCloserBallYVel(float y, Ball ball1, Ball ball2) {
+    public static boolean compareCloserVelY(float y, Ball ball1, Ball ball2) {
         float ball1Ratio = (ball1.getY() - y) / -ball1.getVelY();
         float ball2Ratio = (ball2.getY() - y) / -ball2.getVelY();
         boolean ball1closer;
@@ -314,17 +286,9 @@ public class Ball extends GameObject {
         return ball1closer;
     }
 
-    public static boolean verifySortClose(float x, float y, List<Ball> balls) {
+    public static boolean verifySortCloseVelY(float y, List<Ball> balls) {
         for (int i = 0; i < balls.size()-2; i++) {
-            if(!compareCloserBall(x, y, balls.get(i), balls.get(i+1)))
-                return false;
-        }
-        return true;
-    }
-
-    public static boolean verifySortCloseYVel(float y, List<Ball> balls) {
-        for (int i = 0; i < balls.size()-2; i++) {
-            if(!compareCloserBallYVel(y, balls.get(i), balls.get(i+1)))
+            if(!compareCloserVelY(y, balls.get(i), balls.get(i+1)))
                 return false;
         }
         return true;

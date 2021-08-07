@@ -1,7 +1,6 @@
 package com.gdx.jpong.model.entity;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.gdx.jpong.model.Ball;
 import com.gdx.jpong.model.Paddle;
 
@@ -9,18 +8,18 @@ import java.util.List;
 
 public class PongAI extends PongEntity {
 
-    private float maxSpeed; // how fast this boi move side 2 side like a boss
-    private int maxError; // +- exact x position
+    private float maxSpeed = 5000.f; // how fast this boi move side 2 side like a boss
+    private float maxError; // +- exact x position
     private int updatePrecison; // how many updates/step to check REQUIRES > 0
-    private float reaction;
+    private float reaction = 1.f;
 
     Ball target;
 
-    public PongAI(final Paddle paddle) {
+    public PongAI(final Paddle paddle, float maxSpeed, float reaction) {
         super(paddle);
-        this.maxSpeed = 5500.f;
-        this.maxError = ((int) paddle.getHalfWidth() / 2);
-        this.reaction = 1.1f;
+        this.maxSpeed = maxSpeed; // default 5000
+        this.maxError = paddle.getHalfWidth();
+        this.reaction = reaction; // default 1;
         this.updatePrecison = 60;
     }
 
@@ -34,19 +33,19 @@ public class PongAI extends PongEntity {
     }
 
     private float scaleSpeed(float distanceX) {
-        return (float) (maxSpeed * Math.pow(distanceX / (Gdx.graphics.getWidth() - paddle.getHalfWidth()), reaction));
+        return (float) (maxSpeed * Math.pow(distanceX / (Gdx.graphics.getWidth() - paddle.getWidth()), reaction));
     }
 
     private void predict(float deltaTime, List<Ball> inList) {
         if (!inList.isEmpty()) {
-            List<Ball> balls = Ball.sortByClosestYVelocity(paddle.getY(), inList);
+            float paddleYAim = paddle.getY() - paddle.getHalfHeight();
+            List<Ball> balls = Ball.sortByClosestVelY(paddleYAim, inList);
             // FACING PADDLE
             target = selectTargetBall(balls);
             if (target != null) {
-                float paddleYAim = paddle.getY() - paddle.getHalfHeight();
                 Ball sim = aimAtBall(deltaTime, target, paddleYAim);
                 float deltaX = sim.getX() - paddle.getX();
-                trackX(deltaX, (float) (maxError * Math.random()));
+                trackX(deltaX, (float) (maxError * Math.random() + 0.5f));
             } else {
                 trackX(Gdx.graphics.getWidth() / 2 - paddle.getX() - paddle.getHalfWidth(), maxError);
             }
@@ -77,8 +76,7 @@ public class PongAI extends PongEntity {
     private Ball selectTargetBall(List<Ball> balls) {
         for (Ball ball : balls) {
             if (ball.getVelY() > 0) {
-                if (ball.getY() <= paddle.getY())
-                    return ball;
+                return ball;
             }
         }
         return null;

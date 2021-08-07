@@ -7,29 +7,14 @@ import java.util.Locale;
 public class Clock {
 
     private float timeElapsed; //
-    private float markedTime; // To calc delta between two points
-
-    private boolean paused;
 
     public Clock() {
         timeElapsed = 0;
-        markedTime = 0;
     }
 
-    public void setMarkedTime() {
-        markedTime = timeElapsed;
-    }
-
-    public float getIntervalElapsed() {
-        return timeElapsed - markedTime;
-    }
 
     public void reset() {
         timeElapsed = 0;
-    }
-
-    public float getDeltaTime() {
-        return Gdx.graphics.getDeltaTime();
     }
 
     public float getTimeElapsed() {
@@ -51,15 +36,9 @@ public class Clock {
             return getTimeElapsedMinutes() + ":" + String.format(Locale.US, "%05.2f", getTimeElapsed() % 60);
     }
 
-    // REQUIRES: called every render update in main game loop
-    public void update() {
-        if (!paused) {
-            timeElapsed += getDeltaTime();
-        }
-    }
-
-    public void pause() {
-        paused = true;
+    // set clock to time
+    public void update(float time) {
+        timeElapsed = time;
     }
 
 }
