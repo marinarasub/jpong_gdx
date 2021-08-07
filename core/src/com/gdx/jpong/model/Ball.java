@@ -27,7 +27,7 @@ public class Ball extends GameObject {
     public Ball(float x, float y, float radius, float velX, float velY) {
         super(x, y, velX, velY);
         this.radius = radius;
-        this.color = Color.LIGHT_GRAY;
+        this.color = Color.PINK;
         this.batch = new SpriteBatch();
         this.sprite = new Sprite(texture);
         sprite.setSize(radius * 2, radius * 2);
@@ -36,7 +36,7 @@ public class Ball extends GameObject {
     public Ball(float x, float y, float radius, float velX, float velY, float accX, float accY) {
         super(x, y, velX, velY, accX, accY);
         this.radius = radius;
-        this.color = Color.LIGHT_GRAY;
+        this.color = Color.PINK;
         this.batch = new SpriteBatch();
         this.sprite = new Sprite(texture);
         sprite.setSize(radius * 2, radius * 2);

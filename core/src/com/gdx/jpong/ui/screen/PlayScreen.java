@@ -190,10 +190,12 @@ public class PlayScreen extends GameScreen implements Screen {
     private void handleTime(float deltaTime) {
         songMap.update(deltaTime);
         if (songMap.isWaitingSpawn()) {
-            Float time  = songMap.getSpawnTime();
-            List<Ball> list = songMap.getSpawns(time);
-            balls.addAll(list);
-            songMap.removeAlreadySpawned(time);
+            do {
+                Float time = songMap.getSpawnTime();
+                List<Ball> list = songMap.getSpawns(time);
+                balls.addAll(list);
+                songMap.removeAlreadySpawned(time);
+            } while (songMap.isOvertime());
         }
     }
 
@@ -282,6 +284,10 @@ public class PlayScreen extends GameScreen implements Screen {
                     else
                         resume();
                 }
+                if (keycode == Input.Keys.R) {
+                    dispose();
+                    game.songSelect();
+                }
                 if (keycode == Input.Keys.ESCAPE) {
                     dispose();
                     game.menu();
@@ -316,9 +322,9 @@ public class PlayScreen extends GameScreen implements Screen {
 
     @Override
     public void dispose() {
-        // TODO free
+        songMap.dispose();
         scoreLabel.dispose();
         batch.dispose();
-        //shape.dispose(); TODO
+        shape.dispose();
     }
 }
