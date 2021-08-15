@@ -42,6 +42,7 @@ public class MainMenuScreen extends GameScreen implements Screen {
         menuTable.add(options).width(300f).height(60f).space(10f).expandX().center().row();
         menuTable.add(exit).width(300f).height(60f).space(10f).expandX().center().row();
         menuTable.setFillParent(true);
+        stage.setViewport(viewport);
         stage.addActor(menuTable);
     }
 
@@ -76,7 +77,7 @@ public class MainMenuScreen extends GameScreen implements Screen {
             public void touchUp(InputEvent e, float x, float y, int point, int button) {
                 super.touchUp(e, x, y, point, button);
                 Gdx.app.log("BUTTON", "Options clicked");
-                // TODO options menu
+                game.options();
             }
         });
     }
@@ -109,15 +110,14 @@ public class MainMenuScreen extends GameScreen implements Screen {
 
     @Override
     public void render(float delta) {
-        clear();
-
+        super.render(delta);
         stage.act(delta);
         stage.draw();
     }
 
     @Override
     public void resize(int width, int height) {
-
+        super.resize(width, height);
     }
 
     @Override

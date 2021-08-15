@@ -37,13 +37,13 @@ public class SongSelectScreen extends GameScreen implements Screen, InputProcess
     private final Table table;
     private TextButton menu, play;
     private final Stage stage;
-    private final InputMultiplexer multiInput;
+    private InputMultiplexer multiInput;
 
     // CURRENT SONG
     private String currentTitle = "Select a song";
     private String currentArtist = "";
     private float currentBPM;
-    private Music currentSong;
+    //private Music music;
     // image music.png by https://creativemarket.com/Becris
     private final Texture defaultImage = new Texture(Gdx.files.internal("images/music.png"));
     private Texture currentImage = defaultImage;
@@ -68,11 +68,11 @@ public class SongSelectScreen extends GameScreen implements Screen, InputProcess
         reader = new JsonReader();
         //songInfo.debug();
         //table.debug();
-        skin = new Skin(Gdx.files.internal("uiskin.json"));
+        skin = new Skin(Gdx.files.internal("uiskin.json")); // TODO extract to super
 
         reloadContent();
+        stage.setViewport(viewport);
         stage.addActor(table);
-        multiInput = new InputMultiplexer(stage, this);
     }
 
     private FileHandle getRandomFile() {
@@ -95,8 +95,8 @@ public class SongSelectScreen extends GameScreen implements Screen, InputProcess
         startButton();
         menuButton();
         buildTable();
-        if (currentSong != null)
-            currentSong.play();
+        if (music != null)
+            music.play();
         songList.setSelected(current);
     }
 
@@ -120,8 +120,8 @@ public class SongSelectScreen extends GameScreen implements Screen, InputProcess
             FileHandle song = current.sibling(files.getString("audio"));
             if (song.exists() && !song.isDirectory()) {
                 Gdx.app.log("SONG", song.path());
-                if (currentSong != null) currentSong.dispose();
-                currentSong = Gdx.audio.newMusic(song);
+                if (music != null) music.dispose();
+                music = Gdx.audio.newMusic(song);
             }
         }
     }
@@ -193,9 +193,8 @@ public class SongSelectScreen extends GameScreen implements Screen, InputProcess
         float dim = dimSlider.getVisualValue() / 100;
         float size = sizeSlider.getVisualValue() / 100;
         float vel = velSlider.getVisualValue() / 100;
-        Gdx.app.log("velslider", String.valueOf(vel));
         float diff = diffSlider.getVisualValue();
-        return new SongMap(balls, currentSong, currentImage, game.getSize(), offset, dim, size, vel, diff);
+        return new SongMap(balls, music, currentImage, game.getSize(), offset, dim, size, vel, diff);
     }
 
     private void menuButton() {
@@ -271,20 +270,20 @@ public class SongSelectScreen extends GameScreen implements Screen, InputProcess
 
     @Override
     public void show() {
+        multiInput = new InputMultiplexer(stage, this);
         Gdx.input.setInputProcessor(multiInput);
     }
 
     @Override
     public void render(float delta) {
-        clear();
-
+        super.render(delta);
         stage.act(delta);
         stage.draw();
     }
 
     @Override
     public void resize(int width, int height) {
-
+        super.resize(width, height);
     }
 
     @Override
@@ -304,7 +303,7 @@ public class SongSelectScreen extends GameScreen implements Screen, InputProcess
 
     @Override
     public void dispose() {
-        currentSong.dispose();
+        music.dispose();
         stage.dispose();
     }
 

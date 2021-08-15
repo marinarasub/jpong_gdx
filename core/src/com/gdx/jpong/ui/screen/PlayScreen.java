@@ -32,7 +32,7 @@ public class PlayScreen extends GameScreen implements Screen {
     // NUMBERS
     private float height;  // LOGICAL HEIGHT
     private float width;
-    private final int fixedUPS = 60; // fixed Updates per second
+    private final int fixedUPS = 120; // fixed Updates per second
     private float fixedTimeCarryover = 0; // time running until next update;
 
     // RENDER TOOLS
@@ -96,13 +96,15 @@ public class PlayScreen extends GameScreen implements Screen {
 
             float heightRatio = game.getHeight() / background.getHeight();
             float widthRatio = game.getWidth() / background.getWidth();
-
+            // TODO Custom x, y offset
             if (heightRatio > widthRatio) {
                 background.setScale(heightRatio);
-                background.setPosition((game.getWidth() - background.getWidth()) / 2, 0);
+                background.setPosition((game.getWidth() - heightRatio * background.getWidth()) / 2, 0);
+                System.out.println("H > W\n");
             } else {
                 background.setScale(widthRatio);
-                background.setPosition(0,(game.getHeight() - background.getHeight()) / 2);
+                background.setPosition(0,(game.getHeight() - widthRatio * background.getHeight()) / 2);
+                System.out.println("W > H\n");
             }
         }
     }
@@ -123,6 +125,7 @@ public class PlayScreen extends GameScreen implements Screen {
             game.setScreen(new SongEndScreen(game, songMap, player, ai));
             dispose();
         });
+        music = song.getMusic();
     }
 
 
@@ -150,7 +153,7 @@ public class PlayScreen extends GameScreen implements Screen {
             fixedUpdate(delta);
             update(delta);
         }
-        clear();
+        super.render(delta);
         renderBackground();
         renderGraphics();
         renderHUD();
@@ -239,18 +242,6 @@ public class PlayScreen extends GameScreen implements Screen {
         }
     }
 
-    /**
-     * @deprecated
-     */
-    private void handleInput() {
-//        if (Gdx.input.isButtonJustPressed(Input.Keys.LEFT)) {
-//            balls.add(randomBall());
-//        }
-//        if (Gdx.input.isKeyJustPressed(Input.Keys.A)) {
-//            balls.forEach(System.out::println);
-//        }
-
-    }
 
 //    private Ball randomBall() {
 //        Random r = new Random();
@@ -275,6 +266,7 @@ public class PlayScreen extends GameScreen implements Screen {
 
     @Override
     public void show() {
+        super.show();
         Gdx.input.setInputProcessor(new InputAdapter() {
             @Override
             public boolean keyDown (int keycode) {
@@ -300,7 +292,7 @@ public class PlayScreen extends GameScreen implements Screen {
 
     @Override
     public void resize(int width, int height) {
-
+        super.resize(width, height);
     }
 
     @Override

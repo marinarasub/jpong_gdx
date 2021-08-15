@@ -16,7 +16,7 @@ public class EditorScreen extends GameScreen implements Screen {
 
     @Override
     public void render(float delta) {
-        clear();
+        super.render(delta);
     }
 
     @Override

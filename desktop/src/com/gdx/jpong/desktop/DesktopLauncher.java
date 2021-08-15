@@ -22,6 +22,7 @@ public class DesktopLauncher {
 		//System.out.println(System.getProperty("java.version", null));
 		config = new Lwjgl3ApplicationConfiguration();
 		config.setTitle(TITLE);
+		config.setWindowedMode(WIDTH, HEIGHT);
 		int samples = 4;
 		config.setBackBufferConfig(8, 8, 8, 8, 16, 0, samples);
 		new Lwjgl3Application(new PongGame(), config);
