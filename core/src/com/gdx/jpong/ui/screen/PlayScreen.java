@@ -100,11 +100,9 @@ public class PlayScreen extends GameScreen implements Screen {
             if (heightRatio > widthRatio) {
                 background.setScale(heightRatio);
                 background.setPosition((game.getWidth() - heightRatio * background.getWidth()) / 2, 0);
-                System.out.println("H > W\n");
             } else {
                 background.setScale(widthRatio);
                 background.setPosition(0,(game.getHeight() - widthRatio * background.getHeight()) / 2);
-                System.out.println("W > H\n");
             }
         }
     }

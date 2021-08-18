@@ -40,9 +40,8 @@ public class OptionsScreen extends GameScreen implements Screen {
         displayOptions();
         graphicsOptions();
         audioOptions();
-
-        table.add(new Label("INPUT", skin)).left().colspan(2).space(10).row(); // Keybinds
-
+        inputOptions();
+        // add back button to menu
         TextButton menu = new TextButton("BACK", skin);
         menu.addListener(new ClickListener() {
             @Override
@@ -56,23 +55,34 @@ public class OptionsScreen extends GameScreen implements Screen {
         table.add(menu).left().row();
     }
 
+    private void inputOptions() {
+        table.add(new Label("INPUT", skin)).left().colspan(2).space(10).row(); // TODO sensitivity, Keybinds
+    }
+
     private void displayOptions() {
         table.add(new Label("DISPLAY", skin)).left().colspan(2).space(10).row();
+        resolutionOption();
+        displayModeOption();
+        refreshRateOption();
+    }
 
-        SelectBox<Vector2> resolution = new SelectBox<>(skin);
-        Vector2[] supportedResolutions = getSupportedResolutions();
-        resolution.setItems(supportedResolutions);
-        resolution.setSelected(game.getSize());
-        resolution.addListener(new ChangeListener() {
+    private void refreshRateOption() {
+        SelectBox<Integer> fps = new SelectBox<>(skin);
+        Graphics.DisplayMode nativeDisplay = Gdx.graphics.getDisplayMode();
+        int nativeFPS = nativeDisplay.refreshRate;
+        fps.setItems(nativeFPS, 144, 120, 60, 30); // TODO sort by hz, remove duplicate, unlimited
+        fps.setSelected(game.getTargetFPS());
+        fps.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
-                Vector2 size = resolution.getSelected();
-                game.changeDisplay(Gdx.graphics.isFullscreen(), (int)size.x, (int)size.y);
+                game.setTargetFPS(fps.getSelected());
             }
         });
-        table.add(new Label("Resolution", skin)).left().space(10);
-        table.add(resolution).width(200).height(30).space(10).row();
+        table.add(new Label("Refresh Rate", skin)).left().space(10);
+        table.add(fps).width(100).right().space(10).row();
+    }
 
+    private void displayModeOption() {
         SelectBox<String> screenMode = new SelectBox<>(skin);
         screenMode.setItems("Windowed", "Fullscreen");
         screenMode.setSelected(game.isFullscreen() ? "Fullscreen" : "Windowed");
@@ -88,19 +98,22 @@ public class OptionsScreen extends GameScreen implements Screen {
         });
         table.add(new Label("Display Mode", skin)).left().space(10);
         table.add(screenMode).width(200).height(30).space(10).row();
+    }
 
-
-        SelectBox<Integer> fps = new SelectBox<>(skin);
-        fps.setItems(144, 120, 60, 30); // TODO set list to var
-        fps.setSelected(game.getTargetFPS());
-        fps.addListener(new ChangeListener() {
+    private void resolutionOption() {
+        SelectBox<Vector2> resolution = new SelectBox<>(skin);
+        Vector2[] supportedResolutions = getSupportedResolutions(); // TODO sorted by size
+        resolution.setItems(supportedResolutions);
+        resolution.setSelected(game.getSize());
+        resolution.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
-                game.setTargetFPS(fps.getSelected());
+                Vector2 size = resolution.getSelected();
+                game.changeDisplay(Gdx.graphics.isFullscreen(), (int)size.x, (int)size.y);
             }
         });
-        table.add(new Label("Refresh Rate", skin)).left().space(10);
-        table.add(fps).width(100).right().space(10).row();
+        table.add(new Label("Resolution", skin)).left().space(10);
+        table.add(resolution).width(200).height(30).space(10).row();
     }
 
     private Vector2[] getSupportedResolutions() {
@@ -113,6 +126,7 @@ public class OptionsScreen extends GameScreen implements Screen {
         desiredResolutions.add(new Vector2(1280, 720)); // 720p
         desiredResolutions.add(new Vector2(1024, 768)); // 720p
         desiredResolutions.add(new Vector2(640, 480)); // 480p
+        desiredResolutions.add(new Vector2(-1, -1)); // TEST ILLEGAL
 
         desiredResolutions.removeIf(size -> size.x > nativeDisplay.width || size.y > nativeDisplay.height);
         return desiredResolutions.toArray(new Vector2[0]);
@@ -184,6 +198,6 @@ public class OptionsScreen extends GameScreen implements Screen {
     // TODO fix screens disposal - blank, etc.
     @Override
     public void dispose() {
-
+        //stage.dispose();
     }
 }

@@ -9,6 +9,9 @@ import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.utils.XmlReader;
 import com.gdx.jpong.ui.PongGame;
 
+/**
+ * Launches the Desktop Application
+ */
 public class DesktopLauncher {
 
 	static final int WIDTH = 1024;
