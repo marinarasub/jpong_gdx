@@ -9,6 +9,9 @@ import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.utils.XmlReader;
 import com.gdx.jpong.ui.PongGame;
 
+/**
+ * Launches the Desktop Application
+ */
 public class DesktopLauncher {
 
 	static final int WIDTH = 1024;
@@ -22,6 +25,7 @@ public class DesktopLauncher {
 		//System.out.println(System.getProperty("java.version", null));
 		config = new Lwjgl3ApplicationConfiguration();
 		config.setTitle(TITLE);
+		config.setWindowedMode(WIDTH, HEIGHT);
 		int samples = 4;
 		config.setBackBufferConfig(8, 8, 8, 8, 16, 0, samples);
 		new Lwjgl3Application(new PongGame(), config);

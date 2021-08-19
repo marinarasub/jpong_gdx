@@ -98,7 +98,7 @@ public class Ball extends GameObject {
                 && getX() - lenience <= paddle.getX() + halfPaddleWidth;
     }
 
-    /**
+    /** TODO clean up
      * @param paddle paddle to check collision with
      * @return true if collision
      */
@@ -125,7 +125,13 @@ public class Ball extends GameObject {
                         this.translate(0, -intersectY);
                     }
                 } else {
-                    handleImmunity(paddle);
+                    if (handleImmunity(paddle)) {
+                        if (paddle.getY() < this.getY()) {
+                            this.translate(0, intersectY);
+                        } else {
+                            this.translate(0, -intersectY);
+                        }
+                    }
                 }
             } else { //if (this.y >= paddle.y - halfPaddleHeight && this.y <= paddle.y + halfPaddleHeight) {
                 if (!immune) {
@@ -149,15 +155,18 @@ public class Ball extends GameObject {
             hitSound.play(0.3f);
     }
 
-    private void handleImmunity(Paddle paddle) {
+    private boolean handleImmunity(Paddle paddle) {
         if (this.getVelY() > 0) {
             if (this.getY() > Gdx.graphics.getWidth() / 2) {
                 removeImmunity();
+                return true;
             }
         } else {
             if (this.getY() < Gdx.graphics.getWidth() / 2)
                 removeImmunity();
+                return true;
         }
+        return false;
     }
 
     private void removeImmunity() {

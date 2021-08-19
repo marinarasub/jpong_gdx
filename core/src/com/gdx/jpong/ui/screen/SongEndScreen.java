@@ -77,8 +77,7 @@ public class SongEndScreen extends GameScreen {
 
     @Override
     public void render(float delta) {
-        clear();
-
+        super.render(delta);
         stage.act(delta);
         stage.draw();
     }

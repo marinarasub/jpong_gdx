@@ -71,7 +71,7 @@ public class SongMap {
                 int side = Math.round(b.getY()); // 1 is top (ai side) 0 is bot (player)
                 b.setY(side == 0 ? -r : h+r); // TODO
                 b.setVelX(clamp(b.getVelX() * velocityMultiplier / 1000, -1,  1) * w); // 1000 is one w/h per second
-                b.setVelY(clamp(b.getVelY() * velocityMultiplier / 1000, -1, 1) * h);
+                b.setVelY(clamp(b.getVelY() * velocityMultiplier / 1000, -1, 1) * h); // TODO scale by w/h or no?
                 b.setAccX(clamp(b.getAccX() / 1000, -0.5f, 0.5f) * w);
                 b.setAccY(clamp(b.getAccY() / 1000, -0.1f, 0.1f) * h);
                 //b.setColor(); TODO add color to json
@@ -98,6 +98,10 @@ public class SongMap {
 
     public float getDifficulty() {
         return difficulty;
+    }
+
+    public Music getMusic() {
+        return this.music;
     }
 
     public void setBackground(Texture image) {
