@@ -71,4 +71,9 @@ public class Paddle extends GameObject {
         batch.end();
     }
 
+    @Override
+    public String toString() {
+        return "Paddle @ (" + this.getX() + ", " + this.getY() + ")";
+    }
+
 }

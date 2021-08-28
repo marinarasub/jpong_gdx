@@ -119,19 +119,9 @@ public class Ball extends GameObject {
                 if (!immune) {
                     playHitsound();
                     setVelocity(calculateNewVelocity(paddle, deltaX, getVelY()));
-                    if (paddle.getY() < this.getY()) {
-                        this.translate(0, intersectY);
-                    } else {
-                        this.translate(0, -intersectY);
-                    }
+                    setYToPaddle(paddle);
                 } else {
-                    if (handleImmunity(paddle)) {
-                        if (paddle.getY() < this.getY()) {
-                            this.translate(0, intersectY);
-                        } else {
-                            this.translate(0, -intersectY);
-                        }
-                    }
+                    handleImmunity(paddle);
                 }
             } else { //if (this.y >= paddle.y - halfPaddleHeight && this.y <= paddle.y + halfPaddleHeight) {
                 if (!immune) {
@@ -148,6 +138,14 @@ public class Ball extends GameObject {
             return true;
         }
         return false;
+    }
+
+    private void setYToPaddle(Paddle paddle) {
+        if (this.getVelY() < 0) {
+            this.setY(paddle.getY() - paddle.getHalfHeight() - this.getRadius());
+        } else {
+            this.setY(paddle.getY() + paddle.getHalfHeight() + this.getRadius());
+        }
     }
 
     private void playHitsound() {
