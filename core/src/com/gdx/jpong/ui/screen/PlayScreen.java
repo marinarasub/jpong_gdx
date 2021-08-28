@@ -76,7 +76,7 @@ public class PlayScreen extends GameScreen implements Screen {
     }
 
     private void players() {
-        float buffer = 50.f;
+        float buffer = game.getHeight() * 0.05f;
         player = new PongPlayer(new Paddle(250.f, buffer));
         player.setPaddleColor(Color.GREEN);
         ai = new PongAI(
@@ -84,6 +84,14 @@ public class PlayScreen extends GameScreen implements Screen {
                 songMap.getDifficulty() * 1000,
                 1.5f - songMap.getDifficulty() / 10);
         ai.setPaddleColor(Color.RED);
+        alignPaddles(buffer);
+    }
+
+    private void alignPaddles(float buffer) {
+        if (player != null)
+            player.setPaddleY(buffer);
+        if (ai != null)
+            ai.setPaddleY(game.getHeight() - buffer);
     }
 
     private void background() {
@@ -240,24 +248,24 @@ public class PlayScreen extends GameScreen implements Screen {
         }
     }
 
-
-//    private Ball randomBall() {
-//        Random r = new Random();
-//        float velMultiplier = 100.f;
-//        return new Ball(
-//                (songMap.getTime() * 50) % game.getWidth(),
-//                (int) songMap.getTime() % 2 == 1 ?
-//                        0 + player.getPaddle().getHeight()
-//                        : game.getHeight() - 0 - ai.getPaddle().getHeight(), // TODO set const
-//                // for 50
-//                16.f, // TODO const ball radius
-//                10 * (r.nextFloat() - 0.5f),
-//                (int) songMap.getTime() % 2 == 1 ?
-//                        velMultiplier * (r.nextFloat()) + 150.f
-//                        : velMultiplier * (-r.nextFloat()) - 150.f,
-//                50.f * (r.nextFloat() - 0.5f),
-//                0);
-//    }
+    // helper for debug
+    private Ball randomBall() {
+        Random r = new Random();
+        float velMultiplier = 100.f;
+        return new Ball(
+                (songMap.getTime() * 50) % game.getWidth(),
+                (int) songMap.getTime() % 2 == 1 ?
+                        0 + player.getPaddle().getHeight()
+                        : game.getHeight() - 0 - ai.getPaddle().getHeight(), // TODO set const
+                // for 50
+                16.f, // TODO const ball radius
+                10 * (r.nextFloat() - 0.5f),
+                (int) songMap.getTime() % 2 == 1 ?
+                        velMultiplier * (r.nextFloat()) + 150.f
+                        : velMultiplier * (-r.nextFloat()) - 150.f,
+                50.f * (r.nextFloat() - 0.5f),
+                0);
+    }
 
 
     /* CONTROL METHODS */
@@ -268,6 +276,9 @@ public class PlayScreen extends GameScreen implements Screen {
         Gdx.input.setInputProcessor(new InputAdapter() {
             @Override
             public boolean keyDown (int keycode) {
+                if (keycode == Input.Keys.S) {
+                    balls.add(randomBall());
+                }
                 if (keycode == Input.Keys.P) {
                     if (running)
                         pause();
@@ -291,6 +302,7 @@ public class PlayScreen extends GameScreen implements Screen {
     @Override
     public void resize(int width, int height) {
         super.resize(width, height);
+        alignPaddles(game.getHeight() * 0.05f);
     }
 
     @Override
@@ -307,7 +319,7 @@ public class PlayScreen extends GameScreen implements Screen {
 
     @Override
     public void hide() {
-
+        songMap.pause();
     }
 
     @Override

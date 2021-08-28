@@ -45,4 +45,8 @@ public abstract class PongEntity {
     public void draw(ShapeRenderer shape) {
         paddle.draw(shape);
     }
+
+    public void setPaddleY(float y) {
+        paddle.setY(y);
+    }
 }

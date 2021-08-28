@@ -19,4 +19,5 @@ public class PongPlayer extends PongEntity {
         //paddle.setY(Gdx.graphics.getHeight() - Gdx.input.getY());
         paddle.update(deltaTime);
     }
+
 }
