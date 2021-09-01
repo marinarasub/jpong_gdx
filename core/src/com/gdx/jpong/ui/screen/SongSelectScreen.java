@@ -244,6 +244,18 @@ public class SongSelectScreen extends GameScreen implements Screen, InputProcess
         dimSlider = new Slider(0, 100, 1, false, skin);
         dimSlider.setVisualPercent(half);
         songInfo.add(dimSlider).row();
+
+        songInfo.add(new Label("Volume", skin)).pad(10);
+        volSlider = new Slider(0, 100, 1, false, skin);
+        volSlider.setVisualPercent(half);
+        volSlider.addListener(new DragListener() {
+            @Override
+            public void touchDragged (InputEvent e, float x, float y, int point) {
+                super.touchDragged(e, x, y, point);
+                game.setVolume(volSlider.getVisualPercent());
+            }
+        });
+        songInfo.add(volSlider).row();
     }
 
     private VerticalGroup buildSongInfo() {
