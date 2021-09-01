@@ -13,6 +13,7 @@ import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
+import com.badlogic.gdx.scenes.scene2d.utils.DragListener;
 import com.badlogic.gdx.utils.*;
 import com.gdx.jpong.model.Ball;
 import com.gdx.jpong.model.SongMap;
@@ -53,6 +54,7 @@ public class SongSelectScreen extends GameScreen implements Screen, InputProcess
     private Slider sizeSlider;
     private Slider velSlider;
     private Slider dimSlider;
+    private Slider volSlider;
 
     public SongSelectScreen(PongGame game) {
         super(game);
