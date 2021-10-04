@@ -4,6 +4,8 @@
 
 A Pong Music Game inspired by pwong 2 and osu!  
 
+<img src="/artwork/promo.gif" alt="JPong gif" width="640" height="480" />
+
 ## Development
 Currently in very early development for Desktop.  
 Planned for Desktop, Android, iOS in order.  
