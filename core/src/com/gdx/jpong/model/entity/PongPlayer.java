@@ -1,8 +1,7 @@
 package com.gdx.jpong.model.entity;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
-import com.gdx.jpong.model.Paddle;
+import com.gdx.jpong.model.object.Paddle;
 
 /**
  * handles input and stuff.

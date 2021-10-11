@@ -1,4 +1,4 @@
-package com.gdx.jpong.model;
+package com.gdx.jpong.model.object;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;

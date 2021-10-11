@@ -1,10 +1,11 @@
-package com.gdx.jpong.model;
+package com.gdx.jpong.model.map;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.math.Vector2;
-import com.gdx.jpong.ui.PongGame;
+import com.gdx.jpong.exception.IllegalValueException;
+import com.gdx.jpong.model.object.Ball;
+import com.gdx.jpong.model.Clock;
 
 import java.util.*;
 
@@ -41,24 +42,33 @@ public class SongMap {
     // SIGNAL
     private boolean waitingSpawn; // waiting to spawn
 
-    public SongMap(TreeMap<Float, List<Ball>> rawSpawns,
-                   Music music, Texture bg, Vector2 playSize,
-                   float offset, float dim, float ballSize, float velMult, float difficulty) {
+    public SongMap(TreeMap<Float, List<Ball>> rawSpawns, Music music, Vector2 playSize, float offset) {
         this.playSize = playSize;
-        this.sizeMultiplier = ballSize;
         this.music = music;
-        this.background = bg;
         this.startOffset = offset;
-        this.backgroundDim = dim;
-        this.velocityMultiplier = velMult;
-        this.difficulty = difficulty;
-
-        this.spawns = rawSpawns;
-        processSpawns(rawSpawns);
+        setBackgroundDim(1.f);
+        setMods(1.f, 1.f, 5.f);
+        this.spawns = processSpawns(rawSpawns);
         this.timer = new Clock();
     }
 
-    private void processSpawns(TreeMap<Float, List<Ball>> rawSpawns) {
+    /**
+     * Sets the desired modifiers for gameplay
+     * @param sizeMultiplier multiply raw size (radius) of spawns by this number
+     * @param velocityMultiplier multiply raw velocities of balls by this number
+     * @param difficulty AI difficulty, 1 - 10
+     */
+    public void setMods(float sizeMultiplier, float velocityMultiplier, float difficulty) {
+        this.sizeMultiplier = sizeMultiplier;
+        this.velocityMultiplier = velocityMultiplier;
+        this.difficulty = difficulty;
+    }
+
+    /**
+     * @param rawSpawns spawns specified without processing, i.e. considering play size, mods etc.
+     * @return processed spawns for gameplay. Will be same reference as passed parameter
+     */
+    private TreeMap<Float, List<Ball>> processSpawns(TreeMap<Float, List<Ball>> rawSpawns) {
         for (Float time : rawSpawns.keySet()) {
             List<Ball> balls = rawSpawns.get(time);
             for (Ball b : balls) {
@@ -77,6 +87,7 @@ public class SongMap {
                 //b.setColor(); TODO add color to json
             }
         }
+        return rawSpawns;
     }
 
     // clamp x to -max, max
@@ -89,7 +100,8 @@ public class SongMap {
     }
 
     public void setBackgroundDim(float backgroundDim) {
-        if (backgroundDim <= 1) this.backgroundDim = backgroundDim;
+        if (backgroundDim <= 1 && backgroundDim >= 0) this.backgroundDim = backgroundDim;
+        else throw new IllegalValueException("Background dim must be [0, 1]");
     }
 
     public float getBackgroundDim() {
@@ -136,6 +148,10 @@ public class SongMap {
         music.play();
     }
 
+    /**
+     * updates clock of song map and determines if there is a spawn available at current time, signals if yes
+     * @param delta delta time
+     */
     public void update(float delta) {
         timer.update(music.getPosition());
         if (!start) {

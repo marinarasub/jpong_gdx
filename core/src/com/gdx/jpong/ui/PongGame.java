@@ -3,13 +3,14 @@ package com.gdx.jpong.ui;
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Preferences;
+import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.GdxRuntimeException;
 import com.gdx.jpong.exception.FileLoadException;
 import com.gdx.jpong.exception.FileSaveException;
 import com.gdx.jpong.exception.IllegalSizeException;
 import com.gdx.jpong.exception.IllegalValueException;
-import com.gdx.jpong.model.SongMap;
+import com.gdx.jpong.model.map.SongMap;
 import com.gdx.jpong.ui.screen.*;
 
 /**
@@ -45,6 +46,7 @@ public class PongGame extends Game {
 	private MainMenuScreen menu;
 	private PlayScreen play;
 	private OptionsScreen options;
+	private AssetManager assetManager; // TODO
 
 	// IN GAME SETTINGS
 	private float volume = 1.f; // DEFAULT
@@ -67,6 +69,7 @@ public class PongGame extends Game {
 			// TODO: load defaults from internal file/static variables
 			Gdx.app.error("SETTINGS", "Failed to load");
 		}
+		assetManager = new AssetManager();
 		menu();
 	}
 
@@ -91,6 +94,7 @@ public class PongGame extends Game {
 	 * @see SongSelectScreen
 	 */
 	public void play(SongMap songMap) {
+		if (songMap == null) return;
 		play = new PlayScreen(this, songMap);
 		setScreen(play);
 	}

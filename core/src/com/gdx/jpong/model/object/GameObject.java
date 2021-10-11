@@ -1,4 +1,4 @@
-package com.gdx.jpong.model;
+package com.gdx.jpong.model.object;
 
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Vector2;
@@ -112,5 +112,19 @@ public abstract class GameObject {
     public void update(float deltaTime) {
         position.add(scaleVelX(deltaTime), scaleVelY(deltaTime));
         velocity.add(scaleAccX(deltaTime), scaleAccY(deltaTime));
+    }
+
+    /**
+     * Checks if current game object is equivalent with another object
+     * @return true if all fields are equal in value
+     *         false otherwise
+     * ! Note that game objects can only be equal by reference !
+     */
+    public boolean equivalent(Object o) {
+        if (!(o instanceof  GameObject)) return false;
+        GameObject g = (GameObject) o;
+        return position.equals(g.position) &&
+                velocity.equals(g.velocity) &&
+                acceleration.equals(g.acceleration);
     }
 }

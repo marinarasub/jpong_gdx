@@ -4,7 +4,6 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.Screen;
-import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.scenes.scene2d.Actor;
@@ -14,24 +13,22 @@ import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.scenes.scene2d.utils.DragListener;
-import com.badlogic.gdx.utils.*;
-import com.gdx.jpong.model.Ball;
-import com.gdx.jpong.model.SongMap;
+import com.gdx.jpong.exception.FileLoadException;
+import com.gdx.jpong.model.map.SongHandle;
+import com.gdx.jpong.model.map.SongReader;
 import com.gdx.jpong.ui.PongGame;
 
-import java.util.LinkedList;
-import java.util.Random;
-import java.util.TreeMap;
-
-
+/**
+ * Screen for song/level select of maps that exist in internal directory for non-play information
+ * , passes a playable map to game screen when ready.
+ * @see GameScreen
+ */
 public class SongSelectScreen extends GameScreen implements Screen, InputProcessor {
 
-    private FileHandle current;
-    private final JsonReader reader;
-
     private final Skin skin;
-    private final Array<FileHandle> songs;
-    private List<FileHandle> songList;
+    private final SongReader reader;
+
+    private List<SongHandle> songList; // list UI maintained here
     private ScrollPane songSelect;
     private ScrollPanelListener songSelectListener;
     private final Table songInfo;
@@ -39,15 +36,6 @@ public class SongSelectScreen extends GameScreen implements Screen, InputProcess
     private TextButton menu, play;
     private final Stage stage;
     private InputMultiplexer multiInput;
-
-    // CURRENT SONG
-    private String currentTitle = "Select a song";
-    private String currentArtist = "";
-    private float currentBPM;
-    //private Music music;
-    // image music.png by https://creativemarket.com/Becris
-    private final Texture defaultImage = new Texture(Gdx.files.internal("images/music.png"));
-    private Texture currentImage = defaultImage;
 
     // SLIDERS
     private Slider diffSlider;
@@ -58,91 +46,85 @@ public class SongSelectScreen extends GameScreen implements Screen, InputProcess
 
     public SongSelectScreen(PongGame game) {
         super(game);
-
-        songs = new Array<>();
-        getHandles(Gdx.files.internal("songs/"), songs);
-        if (!songs.isEmpty())
-            current = getRandomFile();
-
+        reader = new SongReader(game.getSize());
         stage = new Stage();
         songInfo = new Table();
         table = new Table();
-        reader = new JsonReader();
-        //songInfo.debug();
-        //table.debug();
         skin = new Skin(Gdx.files.internal("uiskin.json")); // TODO extract to super
-
+        songList = new List<>(skin);
         reloadContent();
+        previewSelected();
         stage.setViewport(viewport);
         stage.addActor(table);
     }
 
-    private FileHandle getRandomFile() {
-        Random r = new Random();
-        return songs.get(r.nextInt(songs.size));
+    // Rebuild content with current song
+    public void reloadContent() {
+        try {
+            reader.clear();
+            reader.getHandles(Gdx.files.internal("songs/"));
+            songList.setItems(reader.getSongs());
+        } catch (Exception e) {
+            Gdx.app.error("FILE LOAD", "error reading song folder: " + e.getMessage());
+        }
+        clearUI();
+        buildUI();
     }
 
-    // Rebuild content with current song
-    private void reloadContent() {
+    /**
+     * Tries to play music of selected song file
+     */
+    private void previewSelected() {
         try {
-            gatherSongInfo();
-        } catch (Exception e) {
-            Gdx.app.error("FILE", "error reading song folder");
-            current = getRandomFile();
+            SongHandle sh = getSelectedSong();
+            if (music != null) music.dispose();
+            if (sh != null) music = sh.getMusic();
+            assert music != null;
+            music.play();
+            music.setOnCompletionListener(e -> songList.setSelected(reader.getRandomFile()));
+        } catch (FileLoadException e) {
+            Gdx.app.error("SONG", e.getMessage());
         }
-        table.clear();
-        songInfo.clear();
+    }
+
+    /**
+     * @return the selected song (highlighted) in the song select pane
+     *          unless none, then return random file
+     *          (can be null)
+     */
+    private SongHandle getSelectedSong() {
+        SongHandle s = songList.getSelected();
+        if (s == null) s = reader.getRandomFile();
+        songList.setSelected(s);
+        return s;
+    }
+
+    /**
+     * Builds all UI components, including song info panel, song select pane and buttons.
+     */
+    private void buildUI() {
         buildSongPanel();
         buildSongSelect();
         startButton();
         menuButton();
         buildTable();
-        if (music != null)
-            music.play();
-        songList.setSelected(current);
     }
 
-    private void gatherSongInfo() throws GdxRuntimeException {
-        if (current != null) {
-            JsonValue json = reader.parse(current);
-            JsonValue meta = json.get("metadata");
-            currentTitle = meta.getString("title");
-            currentArtist = meta.getString("artist");
-            JsonValue time = json.get("timing");
-            currentBPM = time.getFloat("bpm");
-            JsonValue files = json.get("files");
-            FileHandle image = current.sibling(files.getString("background"));
-            if (image.exists() && !image.isDirectory()) {
-                Gdx.app.log("IMAGE", image.path());
-                currentImage = new Texture(Gdx.files.internal(image.path()));
-                currentImage.setAnisotropicFilter(16);
-            } else {
-                currentImage = defaultImage;
-            }
-            FileHandle song = current.sibling(files.getString("audio"));
-            if (song.exists() && !song.isDirectory()) {
-                Gdx.app.log("SONG", song.path());
-                if (music != null) music.dispose();
-                music = Gdx.audio.newMusic(song);
-            }
-        }
+    /**
+     * Clears the UI of any previously set state
+     */
+    private void clearUI() {
+        table.clear();
+        songInfo.clear();
+        songList.clear();
     }
 
-    private void getHandles(FileHandle root, Array<FileHandle> handles) {
-        FileHandle[] folders = root.list();
-        for (FileHandle f : folders) {
-            if (f.isDirectory()) {
-                FileHandle songFile = f.child("song.json");
-                if (songFile.exists()) {
-                    handles.add(songFile);
-                }
-            }
-        }
-    }
-
+    /**
+     * Builds the song select pane for choosing different song files/levels
+     */
     private void buildSongSelect() {
         songList = new List<>(skin);
-        songList.setItems(songs);
+        songList.setItems(reader.getSongs());
         songList.addListener(new SongSelectListener());
 
         songSelect = new ScrollPane(songList, skin);
@@ -151,54 +133,37 @@ public class SongSelectScreen extends GameScreen implements Screen, InputProcess
         songSelect.setScrollingDisabled(true, false);
     }
 
+    /**
+     * Adds a button to attempt to create a song map and start the current map file
+     * If successful, map modification values will be taken from slider values
+     */
     private void startButton() {
         play = new TextButton("START", skin);
         play.addListener(new ClickListener() {
             @Override
-            public void touchUp (InputEvent e, float x, float y, int point, int button) {
-                super.touchUp(e, x, y, point, button);
+            public void touchUp (InputEvent ev, float x, float y, int point, int button) {
+                super.touchUp(ev, x, y, point, button);
                 Gdx.app.log("BUTTON", "Start clicked");
                 Gdx.app.log("SELECT", "Select" + songSelect.getActor());
-                dispose();
-                game.play(mapFromCurrent()); // TODO
+                SongHandle file = getSelectedSong();
+                try {
+                    game.play(reader.buildSongMap(file,
+                            dimSlider.getVisualPercent(),
+                            sizeSlider.getValue(),
+                            velSlider.getValue(),
+                            diffSlider.getValue()));
+                    dispose();
+                } catch (FileLoadException ex) {
+                    Gdx.app.error("START", ex.getMessage());
+                }
             }
         });
         play.pad(10);
     }
 
-    private SongMap mapFromCurrent() {
-        JsonValue json = reader.parse(current);
-
-        TreeMap<Float, java.util.List<Ball>> balls = new TreeMap<>();
-        JsonValue spawns = json.get("objects");
-        for (JsonValue b : spawns) {
-            Float time = b.getFloat("time");
-            float x = b.getFloat("spawnX");
-            float y = b.getFloat("spawnY");
-            float radius = b.getFloat("radius");
-            float velX = b.getFloat("velX");
-            float velY = b.getFloat("velY");
-            float accX = b.getFloat("accX");
-            float accY= b.getFloat("accY");
-            Ball ball = new Ball(x, y, radius, velX, velY, accX, accY);
-            java.util.List<Ball> timeList = balls.get(time);
-            if (timeList == null) {
-                java.util.List<Ball> list = new LinkedList<>();
-                list.add(ball);
-                balls.put(time, list);
-            }
-            else {
-                timeList.add(ball);
-            }
-        }
-        float offset = json.get("timing").getFloat("startOffset");
-        float dim = dimSlider.getVisualValue() / 100;
-        float size = sizeSlider.getVisualValue() / 100;
-        float vel = velSlider.getVisualValue() / 100;
-        float diff = diffSlider.getVisualValue();
-        return new SongMap(balls, music, currentImage, game.getSize(), offset, dim, size, vel, diff);
-    }
-
+    /**
+     * Creates a button for returning to the main menu
+     */
     private void menuButton() {
         menu = new TextButton("BACK", skin);
         menu.addListener(new ClickListener() {
@@ -213,17 +178,34 @@ public class SongSelectScreen extends GameScreen implements Screen, InputProcess
         menu.pad(10);
     }
 
+    /**
+     * Creates an info panel with album art and song info (title, artist etc.)
+     */
     private void buildSongPanel() {
         int width = 200;
         int height = 200;
-        Image songImage = new Image(currentImage);
-        songInfo.add(songImage).width(width).height(height).pad(10).left();
-
-        VerticalGroup info = buildSongInfo();
-        songInfo.add(info).row();
+        SongHandle sh = getSelectedSong();
+        VerticalGroup infoBox = null;
+        if (sh != null) {
+            try {
+                Image songImage;
+                Texture t = sh.getImage();
+                if (t != null) songImage = new Image(t);
+                else songImage = new Image(reader.getDefaultImage());
+                songInfo.add(songImage).width(width).height(height).pad(10).left();
+                infoBox = buildSongInfo();
+            } catch (FileLoadException e) {
+                Gdx.app.error("SONG INFO", e.getMessage());
+            }
+        }
+        songInfo.add(infoBox).row();
         addSliders();
     }
 
+    /**
+     * Adds all options/modification sliders to song select
+     */
+    // TODO common method for slider creation
     private void addSliders() {
         float half = 0.5f;
         // song map will calculate.
@@ -260,19 +242,26 @@ public class SongSelectScreen extends GameScreen implements Screen, InputProcess
         songInfo.add(volSlider).row();
     }
 
-    private VerticalGroup buildSongInfo() {
+    /**
+     * Creates a column for displaying song info
+     * @throws FileLoadException if song metadata cannot be read
+     * @return a Vertical Group (1 column table) of song info
+     */
+    private VerticalGroup buildSongInfo() throws FileLoadException {
         VerticalGroup info = new VerticalGroup();
-        Label title = new Label(currentTitle, skin);
+        SongHandle sh = getSelectedSong();
+        Label title = new Label(sh.getTitle(), skin);
         info.addActor(title);
         info.space(10);
-        info.addActor(new Label("by " + currentArtist, skin));
-        info.addActor(new Label("BPM " + currentBPM, skin));
-
-        info.pad(10);
-        info.columnLeft();
+        info.addActor(new Label("by " + sh.getArtist(), skin));
+        info.addActor(new Label("BPM " + sh.getBPM(), skin));
+        info.pad(10);info.columnLeft();
         return info;
     }
 
+    /**
+     * Builds the entire song menu consisting of a song info panel (left) and selection panel (right)
+     */
     private void buildTable() {
         table.setBounds(0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
         table.add(songInfo).pad(10);
@@ -382,11 +371,12 @@ public class SongSelectScreen extends GameScreen implements Screen, InputProcess
         @Override
         public void touchUp(InputEvent e, float x, float y, int point, int button) {
             super.touchUp(e, x, y, point, button);
-            FileHandle target = songList.getSelected();
+            SongHandle target = getSelectedSong();
             Gdx.app.log("SELECT", target.toString());
-            current = target;
             reloadContent();
+            songList.setSelected(target);
             songSelect.setScrollY(y);
+            previewSelected();
         }
     }
 

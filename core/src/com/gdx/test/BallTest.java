@@ -1,7 +1,7 @@
 package com.gdx.test;
 
 import com.badlogic.gdx.math.Vector2;
-import com.gdx.jpong.model.Ball;
+import com.gdx.jpong.model.object.Ball;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -10,6 +10,7 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+// NOTE: cannot test hitsound using JUnit, comment out audio related lines in class Ball
 class BallTest {
 
     List<Ball> balls;
@@ -66,7 +67,6 @@ class BallTest {
         balls.add(new Ball(0, 9, 15.f, 0, 4));
         balls.add(new Ball(0, 1, 15.f, 0, 0));
 
-        assertFalse(balls.isEmpty());
         balls.forEach(System.out::println);
         assertTrue(Ball.verifySortCloseVelY(0, balls));
     }

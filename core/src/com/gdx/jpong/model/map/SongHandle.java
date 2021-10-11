@@ -5,12 +5,10 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.utils.GdxRuntimeException;
 import com.badlogic.gdx.utils.JsonReader;
 import com.badlogic.gdx.utils.JsonValue;
 import com.gdx.jpong.exception.FileLoadException;
 import com.gdx.jpong.model.object.Ball;
-import com.sun.xml.internal.bind.v2.model.core.ID;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -26,6 +24,7 @@ public class SongHandle extends FileHandle {
      * KEYS ENUM: ver 0.0
      * AVOID ANY CHANGES
      */
+    static final String VER_KEY = "version";
     // META
     static final String META_KEY = "metadata";
     static final String TITLE_KEY = "title";
@@ -52,65 +51,75 @@ public class SongHandle extends FileHandle {
     static final String ACCY_KEY = "accY";
 
     // image music.png by https://creativemarket.com/Becris
-    static final Texture DEFAULT_IMAGE = new Texture(Gdx.files.internal("images/music.png"));
+    //static final Texture DEFAULT_IMAGE = new Texture(Gdx.files.internal("images/music.png"));
 
     // FIELD
-    private JsonValue json;
+    private final JsonValue json;
+    private float version;
 
     /**
      * Creates a file handle for song map JSON file
      * @param path string name of file (Ex: file.json)
      */
-    public SongHandle(String path) {
+    public SongHandle(String path) throws FileLoadException {
         super(path, Files.FileType.Internal);
+        if (!this.exists()) throw new FileLoadException("File does not exist");
         JsonReader reader = new JsonReader();
-        json = reader.parse(this.name());
+        json = reader.parse(this);
+        version = json.getFloat(VER_KEY);
     }
 
     // GETTER FOR JSON VALUES USING KEYS
 
+    private String keyErrorMessage(String key) {
+        return "Could not find " + key + " for " + this.name();
+    }
+
     /**
-     * ASSUMES that caller knows the return type of object
-     * @param key Key for value in meta data
-     * @return Object associated with key in JSON object metadata
+     * @param key Key for value in metadata
+     * @throws FileLoadException if the meta or child key is not found
+     * @return String associated with key in JSON object metadata if exists
      */
-    private Object metaData(String key) {
+    private String metaData(String key) throws FileLoadException {
         JsonValue meta = json.get(META_KEY);
-        return meta.getString(key);
+        if (meta == null) throw new FileLoadException(keyErrorMessage(META_KEY));
+        String val = meta.getString(key);
+        if (val == null) throw new FileLoadException(keyErrorMessage(key));
+        return val;
     }
 
     /**
      * @return song title specified by file
      */
-    public String getTitle() {
-        return (String) metaData(TITLE_KEY);
+    public String getTitle() throws FileLoadException {
+        return metaData(TITLE_KEY);
     }
 
     /**
      * @return song artist specified by file
      */
-    public String getArtist() {
-        return (String) metaData(ARTIST_KEY);
+    public String getArtist() throws FileLoadException {
+        return metaData(ARTIST_KEY);
     }
 
     /**
      * @return song author (map creator) specified by file
      */
-    public String getAuthor() {
-        return (String) metaData(AUTHOR_KEY);
+    public String getAuthor() throws FileLoadException {
+        return metaData(AUTHOR_KEY);
     }
 
     /**
      * @return file (map) ID specified by file
      */
-    public int getID() {
-        return (int) metaData(ID_KEY);
+    public int getID() throws FileLoadException {
+        return Integer.parseInt(metaData(ID_KEY));
     }
 
     /**
      * @return true if the ID stored in file matches the hash of the file
      */
-    public boolean checkIDHash() {
+    public boolean checkIDHash() throws FileLoadException {
         return getHash() == getID();
     }
 
@@ -127,16 +136,19 @@ public class SongHandle extends FileHandle {
      * @param key Key for value type of file
      * @return Object associated with key in JSON object files
      */
-    private String file(String key) {
+    private String file(String key) throws FileLoadException {
         JsonValue file = json.get(FILES_KEY);
-        return file.getString(key);
+        if (file == null) throw new FileLoadException(keyErrorMessage(FILES_KEY));
+        String path = file.getString(key);
+        if (path == null) throw new FileLoadException(keyErrorMessage(key));
+        return path;
     }
 
     /**
      * @return null if file does not exist in this (map) directory
      *         else return GDX Music from file
      */
-    public Music getMusic() {
+    public Music getMusic() throws FileLoadException {
         FileHandle song = this.sibling(file(AUDIO_KEY));
         Music music = null;
         if (song.exists() && !song.isDirectory()) {
@@ -149,14 +161,14 @@ public class SongHandle extends FileHandle {
      * @return default texture if file does not exist
      *         else texture from image path given from file
      */
-    public Texture getImage() {
+    public Texture getImage() throws FileLoadException {
         FileHandle image = this.sibling(file(IMAGE_KEY));
-        Texture t;
+        Texture t = null;
         if (image.exists() && !image.isDirectory()) {
             t = new Texture(Gdx.files.internal(image.path()));
             t.setAnisotropicFilter(16);
         } else {
-            t = DEFAULT_IMAGE;
+            //t = DEFAULT_IMAGE;
         }
         return t;
     }
@@ -166,22 +178,23 @@ public class SongHandle extends FileHandle {
      * @param key key in timing object
      * @return a timing float that corresponds to given key
      */
-    private float timing(String key) {
+    private float timing(String key) throws FileLoadException {
         JsonValue timing = json.get(TIMING_KEY);
+        if (timing == null) throw new FileLoadException(keyErrorMessage(TIMING_KEY));
         return timing.getFloat(key);
     }
 
     /**
      * @return song BPM specified by file
      */
-    public float getBPM() {
+    public float getBPM() throws FileLoadException {
         return timing(BPM_KEY);
     }
 
     /**
      * @return start offset for music playback
      */
-    public float getOffset() {
+    public float getOffset() throws FileLoadException {
         return timing(OFFSET_KEY);
     }
 
@@ -203,7 +216,7 @@ public class SongHandle extends FileHandle {
                 velY = b.getFloat(VELY_KEY);
                 accX = b.getFloat(ACCX_KEY);
                 accY= b.getFloat(ACCY_KEY);
-            } catch (GdxRuntimeException e) {
+            } catch (IllegalArgumentException e) {
                 throw new FileLoadException("Failed to load spawn times from " + this.name());
             }
             Ball ball = new Ball(x, y, radius, velX, velY, accX, accY);

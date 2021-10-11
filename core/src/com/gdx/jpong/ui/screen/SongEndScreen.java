@@ -7,7 +7,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
-import com.gdx.jpong.model.SongMap;
+import com.gdx.jpong.model.map.SongMap;
 import com.gdx.jpong.model.entity.PongAI;
 import com.gdx.jpong.model.entity.PongEntity;
 import com.gdx.jpong.model.entity.PongPlayer;

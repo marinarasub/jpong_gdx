@@ -1,0 +1,21 @@
+{
+  "version": 0.0,
+  "metadata": {
+    "id": 0,
+    "title": "TEST MAP",
+    "artist": "ARTIST",
+    "author": "marinarasub"
+  },
+  "files": {
+    "audio": "audio.mp3",
+    "background": "image.png"
+  },
+  "timing": {
+    "bpm": 100,
+    "startOffset": 1.000
+  },
+  "objects": [
+    { "time": 0, "spawnX": 0.5, "spawnY": 0, "radius": 20, "velX": 0, "velY": 100, "accX": 0, "accY": -50 },
+    { "time": 1, "spawnX": 1, "spawnY": 1, "radius": 15, "velX": 200, "velY": -100, "accX": 100, "accY": 0 }
+  ]
+}

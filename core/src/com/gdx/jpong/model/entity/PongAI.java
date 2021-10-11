@@ -1,8 +1,8 @@
 package com.gdx.jpong.model.entity;
 
 import com.badlogic.gdx.Gdx;
-import com.gdx.jpong.model.Ball;
-import com.gdx.jpong.model.Paddle;
+import com.gdx.jpong.model.object.Ball;
+import com.gdx.jpong.model.object.Paddle;
 
 import java.util.List;
 

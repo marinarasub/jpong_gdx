@@ -1,4 +1,4 @@
-package com.gdx.jpong.model;
+package com.gdx.jpong.model.object;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.audio.Sound;
@@ -299,6 +299,16 @@ public class Ball extends GameObject {
                 return false;
         }
         return true;
+    }
+
+    /**
+     * Checks if two balls are EQUIVALENT (NOT equal), i.e. they have the same valued fields.
+     * Note two balls are only equal by reference
+     */
+    public boolean equivalent(Object o) {
+        if (!(o instanceof Ball)) return false;
+        Ball b = (Ball) o;
+        return false; // TODO
     }
 
 
